@@ -1,16 +1,16 @@
-package connectorname_test
+package rabbitmq_test
 
 import (
 	"context"
 	"testing"
 
-	connectorname "github.com/conduitio/conduit-connector-connectorname"
+	rabbitmq "github.com/alarbada/conduit-connector-rabbitmq"
 	"github.com/matryer/is"
 )
 
 func TestTeardown_NoOpen(t *testing.T) {
 	is := is.New(t)
-	con := connectorname.NewDestination()
+	con := rabbitmq.NewDestination()
 	err := con.Teardown(context.Background())
 	is.NoErr(err)
 }

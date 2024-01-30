@@ -1,4 +1,4 @@
-package connectorname
+package rabbitmq
 
 //go:generate paramgen -output=paramgen_dest.go DestinationConfig
 

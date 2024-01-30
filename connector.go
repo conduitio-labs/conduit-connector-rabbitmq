@@ -1,4 +1,4 @@
-package connectorname
+package rabbitmq
 
 import sdk "github.com/conduitio/conduit-connector-sdk"
 

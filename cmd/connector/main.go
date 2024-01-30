@@ -3,9 +3,9 @@ package main
 import (
 	sdk "github.com/conduitio/conduit-connector-sdk"
 
-	connectorname "github.com/conduitio/conduit-connector-connectorname"
+	rabbitmq "github.com/alarbada/conduit-connector-rabbitmq"
 )
 
 func main() {
-	sdk.Serve(connectorname.Connector)
+	sdk.Serve(rabbitmq.Connector)
 }
