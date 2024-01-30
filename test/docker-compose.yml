@@ -1,6 +1,16 @@
-# Configure the services needed for the integration tests.
-# More information at https://docs.docker.com/compose/
-version: "3.9"
+version: "3"
 services:
-  hello-world:
-    image: "hello-world:latest"
+  rabbitmq:
+    stop_grace_period: 100ms
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 2s
+      timeout: 20s
+      retries: 100
+      start_period: 100ms

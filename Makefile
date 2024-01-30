@@ -28,3 +28,9 @@ install-tools:
 
 lint:
 	golangci-lint run -v
+
+up:
+	docker compose -f test/docker-compose.yml up --quiet-pull -d --wait 
+
+down:
+	docker compose -f test/docker-compose.yml down -v --remove-orphans
