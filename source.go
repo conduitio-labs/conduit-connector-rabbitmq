@@ -72,7 +72,10 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 		return rec, errors.New("source message channel closed")
 	}
 
-	pos := Position{DeliveryTag: msg.DeliveryTag}.ToSdkPosition()
+	pos := Position{
+		DeliveryTag: msg.DeliveryTag,
+		QueueName:   s.queue.Name,
+	}.ToSdkPosition()
 	var metadata sdk.Metadata
 	var key sdk.Data
 
@@ -97,13 +100,15 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 }
 
 func (s *Source) Teardown(ctx context.Context) error {
-	chErr := s.ch.Close()
-	connErr := s.conn.Close()
-
-	return errors.Join(chErr, connErr)
+	errCh := s.ch.Close()
+	errConn := s.conn.Close()
+	return errors.Join(errCh, errConn)
 }
 
-type Position struct{ DeliveryTag uint64 }
+type Position struct {
+	DeliveryTag uint64
+	QueueName   string
+}
 
 func (p Position) ToSdkPosition() sdk.Position {
 	bs, err := json.Marshal(p)
