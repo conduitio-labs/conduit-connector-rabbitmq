@@ -53,17 +53,12 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 
 func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
 	for _, record := range records {
-		pos, err := parseSdkPosition(record.Position)
-		if err != nil {
-			return 0, fmt.Errorf("failed to parse position: %w", err)
-		}
-
 		msg := amqp091.Publishing{
 			ContentType: "text/plain",
 			Body:        record.Payload.After.Bytes(),
 		}
 
-		err = d.ch.PublishWithContext(ctx, "", pos.QueueName, false, false, msg)
+		err := d.ch.PublishWithContext(ctx, "", d.config.QueueName, false, false, msg)
 		if err != nil {
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
