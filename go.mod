@@ -8,6 +8,7 @@ require (
 	github.com/conduitio/conduit-connector-sdk v0.8.0
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/matryer/is v1.4.1
+	github.com/rabbitmq/amqp091-go v1.9.0
 )
 
 require (
