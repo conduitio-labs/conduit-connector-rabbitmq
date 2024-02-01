@@ -68,7 +68,19 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 }
 
 func (d *Destination) Teardown(ctx context.Context) error {
-	errch := d.ch.Close()
-	errconn := d.conn.Close()
-	return errors.Join(errch, errconn)
+	errs := []error{}
+
+	if d.ch != nil {
+		if err := d.ch.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if d.conn != nil {
+		if err := d.conn.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	return errors.Join(errs...)
 }

@@ -1,16 +1,15 @@
-package rabbitmq_test
+package rabbitmq
 
 import (
 	"context"
 	"testing"
 
-	rabbitmq "github.com/alarbada/conduit-connector-rabbitmq"
 	"github.com/matryer/is"
 )
 
 func TestTeardown_NoOpen(t *testing.T) {
 	is := is.New(t)
-	con := rabbitmq.NewDestination()
+	con := NewDestination()
 	err := con.Teardown(context.Background())
 	is.NoErr(err)
 }

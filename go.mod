@@ -9,6 +9,7 @@ require (
 	github.com/golangci/golangci-lint v1.55.2
 	github.com/matryer/is v1.4.1
 	github.com/rabbitmq/amqp091-go v1.9.0
+	github.com/rs/zerolog v1.31.0
 )
 
 require (
@@ -149,7 +150,6 @@ require (
 	github.com/quasilyte/gogrep v0.5.0 // indirect
 	github.com/quasilyte/regex/syntax v0.0.0-20210819130434-b3f0c404a727 // indirect
 	github.com/quasilyte/stdinfo v0.0.0-20220114132959-f7386bf02567 // indirect
-	github.com/rs/zerolog v1.31.0 // indirect
 	github.com/ryancurrah/gomodguard v1.3.0 // indirect
 	github.com/ryanrolds/sqlclosecheck v0.5.1 // indirect
 	github.com/sanposhiho/wastedassign/v2 v2.0.7 // indirect

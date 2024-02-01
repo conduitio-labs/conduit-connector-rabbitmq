@@ -41,25 +41,30 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 }
 
 func (s *Source) Open(ctx context.Context, pos sdk.Position) (err error) {
+
 	s.conn, err = amqp091.Dial(s.config.URL)
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
 	}
+	sdk.Logger(ctx).Debug().Msg("connected to RabbitMQ")
 
 	s.ch, err = s.conn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open channel: %w", err)
 	}
+	sdk.Logger(ctx).Debug().Msg("opened channel")
 
 	s.queue, err = s.ch.QueueDeclare(s.config.QueueName, false, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
+	sdk.Logger(ctx).Debug().Msgf("declared queue %s", s.queue.Name)
 
 	s.msgs, err = s.ch.Consume(s.queue.Name, "", false, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("failed to consume: %w", err)
 	}
+	sdk.Logger(ctx).Debug().Msgf("created queue %v", s.queue.Name)
 
 	return nil
 }
@@ -75,13 +80,13 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 	pos := Position{
 		DeliveryTag: msg.DeliveryTag,
 		QueueName:   s.queue.Name,
-	}.ToSdkPosition()
+	}
+	sdkPos := pos.ToSdkPosition()
 	var metadata sdk.Metadata
 	var key sdk.Data
-
 	var payload sdk.Data = sdk.RawData(msg.Body)
 
-	rec = sdk.Util.Source.NewRecordCreate(pos, metadata, key, payload)
+	rec = sdk.Util.Source.NewRecordCreate(sdkPos, metadata, key, payload)
 
 	return rec, nil
 }
@@ -100,9 +105,21 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 }
 
 func (s *Source) Teardown(ctx context.Context) error {
-	errCh := s.ch.Close()
-	errConn := s.conn.Close()
-	return errors.Join(errCh, errConn)
+	errs := []error{}
+
+	if s.ch != nil {
+		if err := s.ch.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	if s.conn != nil {
+		if err := s.conn.Close(); err != nil {
+			errs = append(errs, err)
+		}
+	}
+
+	return errors.Join(errs...)
 }
 
 type Position struct {
