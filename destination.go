@@ -34,6 +34,7 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) erro
 	if err != nil {
 		return fmt.Errorf("invalid config: %w", err)
 	}
+
 	return nil
 }
 
@@ -42,11 +43,13 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
 	}
+	sdk.Logger(ctx).Debug().Msg("connected to RabbitMQ")
 
 	d.ch, err = d.conn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open channel: %w", err)
 	}
+	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
 	return nil
 }
@@ -62,6 +65,10 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 		if err != nil {
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
+
+		sdk.Logger(ctx).Debug().Msgf(
+			"published message %s on %s",
+			string(record.Position), d.config.QueueName)
 	}
 
 	return len(records), nil

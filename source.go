@@ -37,11 +37,11 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 	if err != nil {
 		return fmt.Errorf("invalid config: %w", err)
 	}
+	
 	return nil
 }
 
 func (s *Source) Open(ctx context.Context, pos sdk.Position) (err error) {
-
 	s.conn, err = amqp091.Dial(s.config.URL)
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)

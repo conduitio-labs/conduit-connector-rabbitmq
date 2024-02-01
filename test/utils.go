@@ -39,3 +39,21 @@ func DeleteQueue(is *is.I, queueName string) {
 	_, err = ch.QueueDelete(queueName, false, false, false)
 	is.NoErr(err)
 }
+
+type closable interface {
+	Close() error
+}
+
+func CloseResource(is *is.I, c closable) {
+	err := c.Close()
+	is.NoErr(err)
+}
+
+type teardownable interface {
+	Teardown(context.Context) error
+}
+
+func TeardownResource(is *is.I, ctx context.Context, t teardownable) {
+	err := t.Teardown(ctx)
+	is.NoErr(err)
+}
