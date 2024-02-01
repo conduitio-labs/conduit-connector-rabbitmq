@@ -51,6 +51,12 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	}
 	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
+	_, err = d.ch.QueueDeclare(d.config.QueueName, false, false, false, false, nil)
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+	sdk.Logger(ctx).Debug().Msgf("declared queue %s", d.config.QueueName)
+
 	return nil
 }
 
