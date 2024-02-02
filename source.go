@@ -55,7 +55,7 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 	return nil
 }
 
-func (s *Source) Open(ctx context.Context, _ sdk.Position) (err error) {
+func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 	s.conn, err = amqp091.Dial(s.config.URL)
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
@@ -67,6 +67,20 @@ func (s *Source) Open(ctx context.Context, _ sdk.Position) (err error) {
 		return fmt.Errorf("failed to open channel: %w", err)
 	}
 	sdk.Logger(ctx).Debug().Msg("opened channel")
+
+	if sdkPos != nil {
+		pos, err := parsePosition(sdkPos)
+		if err != nil {
+			return fmt.Errorf("failed to parse position: %w", err)
+		}
+
+		if s.config.QueueName != "" && s.config.QueueName != pos.QueueName {
+			return fmt.Errorf("the old position contains a different queue name than the connector configuration (%q vs %q), please check if the configured queue name changed since the last run", pos.QueueName, s.config.QueueName)
+		}
+
+		sdk.Logger(ctx).Debug().Msg("got queue name from given position")
+		s.config.QueueName = pos.QueueName
+	}
 
 	s.queue, err = s.ch.QueueDeclare(s.config.QueueName, false, false, false, false, nil)
 	if err != nil {
@@ -105,7 +119,7 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 }
 
 func (s *Source) Ack(_ context.Context, position sdk.Position) error {
-	pos, err := parseSdkPosition(position)
+	pos, err := parsePosition(position)
 	if err != nil {
 		return fmt.Errorf("failed to parse position: %w", err)
 	}
@@ -150,7 +164,7 @@ func (p Position) ToSdkPosition() sdk.Position {
 	return sdk.Position(bs)
 }
 
-func parseSdkPosition(pos sdk.Position) (Position, error) {
+func parsePosition(pos sdk.Position) (Position, error) {
 	var p Position
 	err := json.Unmarshal([]byte(pos), &p)
 	if err != nil {
