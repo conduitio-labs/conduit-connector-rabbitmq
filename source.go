@@ -77,11 +77,13 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 		return rec, errors.New("source message channel closed")
 	}
 
-	pos := Position{msg.DeliveryTag, s.queue.Name}
-	sdkPos := pos.ToSdkPosition()
-	metadata := metadataFromMessage(msg)
-	var key sdk.Data
-	var payload sdk.Data = sdk.RawData(msg.Body)
+	var (
+		pos      = Position{msg.DeliveryTag, s.queue.Name}
+		sdkPos   = pos.ToSdkPosition()
+		metadata = metadataFromMessage(msg)
+		key      = sdk.RawData(msg.MessageId)
+		payload  = sdk.RawData(msg.Body)
+	)
 
 	rec = sdk.Util.Source.NewRecordCreate(sdkPos, metadata, key, payload)
 
@@ -164,7 +166,6 @@ func metadataFromMessage(msg amqp091.Delivery) sdk.Metadata {
 	setKey("rabbitmq.correlationId", msg.CorrelationId)
 	setKey("rabbitmq.replyTo", msg.ReplyTo)
 	setKey("rabbitmq.expiration", msg.Expiration)
-	setKey("rabbitmq.messageId", msg.MessageId)
 	setKey("rabbitmq.timestamp", msg.Timestamp)
 	setKey("rabbitmq.type", msg.Type)
 	setKey("rabbitmq.userId", msg.UserId)
