@@ -14,9 +14,14 @@
 
 package rabbitmq
 
-type Config struct {
-	URL string `json:"url" validate:"required"`
+import (
+	"fmt"
 
+	sdk "github.com/conduitio/conduit-connector-sdk"
+)
+
+type Config struct {
+	URL       string `json:"url" validate:"required"`
 	QueueName string `json:"queueName" validate:"required"`
 }
 
@@ -26,4 +31,20 @@ type SourceConfig struct {
 
 type DestinationConfig struct {
 	Config
+
+	ContentType string `json:"contentType" validate:"required"`
+}
+
+func newDestinationConfig(cfg map[string]string) (DestinationConfig, error) {
+	var destCfg DestinationConfig
+	err := sdk.Util.ParseConfig(cfg, cfg)
+	if err != nil {
+		return destCfg, fmt.Errorf("invalid config: %w", err)
+	}
+
+	if destCfg.ContentType == "" {
+		destCfg.ContentType = "text/plain"
+	}
+
+	return destCfg, nil
 }

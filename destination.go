@@ -42,14 +42,11 @@ func (d *Destination) Parameters() map[string]sdk.Parameter {
 	return d.config.Parameters()
 }
 
-func (d *Destination) Configure(ctx context.Context, cfg map[string]string) error {
+func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err error) {
 	sdk.Logger(ctx).Info().Msg("Configuring Destination...")
-	err := sdk.Util.ParseConfig(cfg, &d.config)
-	if err != nil {
-		return fmt.Errorf("invalid config: %w", err)
-	}
 
-	return nil
+	d.config, err = newDestinationConfig(cfg)
+	return err
 }
 
 func (d *Destination) Open(ctx context.Context) (err error) {
@@ -77,7 +74,7 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
 	for _, record := range records {
 		msg := amqp091.Publishing{
-			ContentType: "text/plain",
+			ContentType: d.config.ContentType,
 			Body:        record.Payload.After.Bytes(),
 		}
 
