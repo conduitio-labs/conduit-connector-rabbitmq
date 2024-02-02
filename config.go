@@ -20,8 +20,14 @@ import (
 	sdk "github.com/conduitio/conduit-connector-sdk"
 )
 
+//go:generate paramgen -output=paramgen_src.go SourceConfig
+//go:generate paramgen -output=paramgen_dest.go DestinationConfig
+
 type Config struct {
-	URL       string `json:"url" validate:"required"`
+	// URL is the RabbitMQ server URL
+	URL string `json:"url" validate:"required"`
+
+	// QueueName is the name of the queue to consume from / publish to
 	QueueName string `json:"queueName" validate:"required"`
 }
 
@@ -32,12 +38,13 @@ type SourceConfig struct {
 type DestinationConfig struct {
 	Config
 
-	ContentType string `json:"contentType" validate:"required"`
+	// ContentType is the MIME content type of the messages written to rabbitmq
+	ContentType string `json:"contentType" default:"text/plain"`
 }
 
 func newDestinationConfig(cfg map[string]string) (DestinationConfig, error) {
 	var destCfg DestinationConfig
-	err := sdk.Util.ParseConfig(cfg, cfg)
+	err := sdk.Util.ParseConfig(cfg, &destCfg)
 	if err != nil {
 		return destCfg, fmt.Errorf("invalid config: %w", err)
 	}

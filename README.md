@@ -1,36 +1,32 @@
-# Conduit Connector for <resource>
-[Conduit](https://conduit.io) for <resource>.
+# Conduit Connector for RabbitMQ
+Integration of [Conduit](https://conduit.io) with RabbitMQ.
 
-## How to build?
-Run `make build` to build the connector.
+## How to Build?
+Run `make build` to compile the connector.
 
 ## Testing
-Run `make test` to run all the unit tests. Run `make test-integration` to run the integration tests.
+Execute `make test` to perform all tests.
 
-The Docker compose file at `test/docker-compose.yml` can be used to run the required resource locally.
+Use the Docker Compose file located at `test/docker-compose.yml` for running the required resources locally.
 
-## Source
-A source connector pulls data from an external resource and pushes it to downstream resources via Conduit.
+## Source Connector
+The source connector extracts data from RabbitMQ and sends it to downstream systems via Conduit.
 
-### Configuration
+### Configuration Parameters
 
-| name                  | description                           | required | default value |
-|-----------------------|---------------------------------------|----------|---------------|
-| `source_config_param` | Description of `source_config_param`. | true     | 1000          |
+| Name        | Description                                             | Required | Default Value |
+|-------------|---------------------------------------------------------|----------|---------------|
+| `url`       | The RabbitMQ server's URL.                              | Yes      |               |
+| `queueName` | The name of the RabbitMQ queue to consume messages from.| Yes      |               |
 
-## Destination
-A destination connector pushes data from upstream resources to an external resource via Conduit.
+## Destination Connector
+The destination connector sends data from upstream systems to RabbitMQ via Conduit.
 
-### Configuration
+### Configuration Parameters
 
-| name                       | description                                | required | default value |
-|----------------------------|--------------------------------------------|----------|---------------|
-| `destination_config_param` | Description of `destination_config_param`. | true     | 1000          |
+| Name          | Description                                                          | Required | Default Value |
+|---------------|----------------------------------------------------------------------|----------|---------------|
+| `url`         | The RabbitMQ server's URL.                                           | Yes      |               |
+| `queueName`   | The name of the RabbitMQ queue where messages will be published to.  | Yes      |               |
+| `contentType` | The MIME content type of the messages written to RabbitMQ.           | No       | `text/plain`  |
 
-## Known Issues & Limitations
-* Known issue A
-* Limitation A
-
-## Planned work
-- [ ] Item A
-- [ ] Item B

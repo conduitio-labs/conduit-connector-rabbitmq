@@ -44,8 +44,8 @@ func (d *Destination) Parameters() map[string]sdk.Parameter {
 
 func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err error) {
 	sdk.Logger(ctx).Info().Msg("Configuring Destination...")
-
 	d.config, err = newDestinationConfig(cfg)
+
 	return err
 }
 
