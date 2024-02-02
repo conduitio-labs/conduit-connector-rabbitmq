@@ -11,6 +11,19 @@ linters-settings:
     min-complexity: 20
   goconst:
     ignore-tests: true
+  goheader:
+    template-path: '.golangci.goheader.template'
+    values:
+      regexp:
+        copyright-year: 20[2-9]\d
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - dogsled
+        - gosec
+        - revive
 
 linters:
   # please, do not use `enable-all`: it's deprecated and will be removed soon.
@@ -40,7 +53,7 @@ linters:
     # - gofumpt
     - goheader
     - goimports
-    # - revive # lots of unused parameters in the template, would be helpful for the user to keep them
+    - revive
     # - gomnd
     - gomoddirectives
     - gomodguard
@@ -62,10 +75,10 @@ linters:
     - nolintlint
     # - paralleltest
     - predeclared
-    # - rowserrcheck
+    - rowserrcheck
     - staticcheck
     - stylecheck
-    # - sqlclosecheck
+    - sqlclosecheck
     # - tagliatelle
     # - tenv
     # - thelper
@@ -74,7 +87,20 @@ linters:
     - unconvert
     # - unparam
     - unused
-    # - wastedassign
+    - wastedassign
     - whitespace
-    # - wrapcheck
-    # - wsl
+  # - wrapcheck
+  # - wsl
+
+  # don't enable:
+  # - asciicheck
+  # - dupl
+  # - gochecknoglobals
+  # - gocognit
+  # - godox
+  # - goerr113
+  # - maligned
+  # - nestif
+  # - prealloc
+  # - testpackage
+  # - wsl

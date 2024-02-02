@@ -27,7 +27,7 @@ install-tools:
 	@go mod tidy
 
 lint:
-	golangci-lint run -v
+	golangci-lint run
 
 up:
 	docker compose -f test/docker-compose.yml up --quiet-pull -d --wait 

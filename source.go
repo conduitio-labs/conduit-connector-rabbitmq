@@ -1,3 +1,17 @@
+// Copyright © 2024 Meroxa, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rabbitmq
 
 //go:generate paramgen -output=paramgen_src.go SourceConfig
@@ -41,7 +55,7 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 	return nil
 }
 
-func (s *Source) Open(ctx context.Context, pos sdk.Position) (err error) {
+func (s *Source) Open(ctx context.Context, _ sdk.Position) (err error) {
 	s.conn, err = amqp091.Dial(s.config.URL)
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
@@ -90,7 +104,7 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 	return rec, nil
 }
 
-func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
+func (s *Source) Ack(_ context.Context, position sdk.Position) error {
 	pos, err := parseSdkPosition(position)
 	if err != nil {
 		return fmt.Errorf("failed to parse position: %w", err)
@@ -103,7 +117,7 @@ func (s *Source) Ack(ctx context.Context, position sdk.Position) error {
 	return nil
 }
 
-func (s *Source) Teardown(ctx context.Context) error {
+func (s *Source) Teardown(_ context.Context) error {
 	errs := []error{}
 
 	if s.ch != nil {

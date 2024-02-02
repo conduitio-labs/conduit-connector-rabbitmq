@@ -1,3 +1,17 @@
+// Copyright © 2024 Meroxa, Inc.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package rabbitmq
 
 import (
@@ -71,7 +85,7 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 	testSourceIntegrationRead(ctx, is, cfgMap, lastPosition, wantRecs, false)
 }
 
-const testAppId = "id-1234"
+const testAppID = "id-1234"
 
 func generateRabbitmqMsgs(from, to int) []amqp091.Publishing {
 	var msgs []amqp091.Publishing
@@ -81,7 +95,7 @@ func generateRabbitmqMsgs(from, to int) []amqp091.Publishing {
 			MessageId:   fmt.Sprintf("test-msg-id-%d", i),
 			ContentType: "text/plain",
 			// setting testAppId asserts that the metadata is being set
-			AppId: testAppId,
+			AppId: testAppID,
 
 			Body: []byte(fmt.Sprintf("test-payload-%d", i)),
 		}
@@ -145,7 +159,7 @@ func testSourceIntegrationRead(
 		is.Equal(wantPayload, recPayload)
 
 		is.Equal(wantRecord.MessageId, string(rec.Key.Bytes()))
-		is.Equal(testAppId, rec.Metadata["rabbitmq.appId"])
+		is.Equal(testAppID, rec.Metadata["rabbitmq.appId"])
 
 		positions = append(positions, rec.Position)
 	}
