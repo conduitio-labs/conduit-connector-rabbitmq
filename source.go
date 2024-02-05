@@ -97,7 +97,7 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 	return nil
 }
 
-func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
+func (s *Source) Read(_ context.Context) (sdk.Record, error) {
 	var rec sdk.Record
 
 	msg, ok := <-s.msgs
