@@ -73,7 +73,9 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 
 func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
 	for _, record := range records {
+		msgId := string(record.Key.Bytes())
 		msg := amqp091.Publishing{
+			MessageId:   msgId,
 			ContentType: d.config.ContentType,
 			Body:        record.Payload.After.Bytes(),
 		}
@@ -83,28 +85,15 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
 
-		sdk.Logger(ctx).Debug().Msgf(
-			"published message %s on %s",
-			string(record.Position), d.config.QueueName)
+		sdk.Logger(ctx).Debug().Msgf("published message %s on %s", msgId, d.config.QueueName)
 	}
 
 	return len(records), nil
 }
 
 func (d *Destination) Teardown(_ context.Context) error {
-	errs := []error{}
+	chcloseErr := closeResource(d.ch)
+	connCloseErr := closeResource(d.conn)
 
-	if d.ch != nil {
-		if err := d.ch.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	if d.conn != nil {
-		if err := d.conn.Close(); err != nil {
-			errs = append(errs, err)
-		}
-	}
-
-	return errors.Join(errs...)
+	return errors.Join(chcloseErr, connCloseErr)
 }

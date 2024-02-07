@@ -41,7 +41,6 @@ func newDestinationCfg(queueName string) map[string]string {
 }
 
 func TestDestination_Integration(t *testing.T) {
-	// ctx := test.CtxWithLogger()
 	ctx := context.Background()
 	is := is.New(t)
 
