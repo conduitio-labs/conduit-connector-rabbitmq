@@ -73,9 +73,9 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 
 func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
 	for _, record := range records {
-		msgId := string(record.Key.Bytes())
+		msgID := string(record.Key.Bytes())
 		msg := amqp091.Publishing{
-			MessageId:   msgId,
+			MessageId:   msgID,
 			ContentType: d.config.ContentType,
 			Body:        record.Payload.After.Bytes(),
 		}
@@ -85,7 +85,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
 
-		sdk.Logger(ctx).Debug().Msgf("published message %s on %s", msgId, d.config.QueueName)
+		sdk.Logger(ctx).Debug().Msgf("published message %s on %s", msgID, d.config.QueueName)
 	}
 
 	return len(records), nil

@@ -34,7 +34,6 @@ func init() {
 	// zerolog.DefaultContextLogger = &log
 }
 
-
 func TestAcceptance(t *testing.T) {
 	cfg := map[string]string{
 		"url":       test.URL,
@@ -82,13 +81,7 @@ func encodeData(bs sdk.Data, t *testing.T) sdk.Data {
 // The reason is that there's an unexpected behaviour with how rabbitmq handles message ids.
 func (d AcceptanceTestDriver) GenerateRecord(t *testing.T, op sdk.Operation) sdk.Record {
 	rec := d.ConfigurableAcceptanceTestDriver.GenerateRecord(t, op)
-	keyBuff := bytes.NewBuffer([]byte{})
-	_, err := base64.NewEncoder(base64.StdEncoding, keyBuff).Write(rec.Bytes())
-	if err != nil {
-		t.Fatalf("failed to encode record: %v", err)
-	}
-
-	rec.Key = sdk.RawData(keyBuff.Bytes())
+	rec.Key = encodeData(rec.Key, t)
 
 	return sdk.Record{
 		Position:  sdk.Position(randBytes()),
