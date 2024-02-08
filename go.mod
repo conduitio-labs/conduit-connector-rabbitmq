@@ -9,7 +9,6 @@ require (
 	github.com/google/uuid v1.4.0
 	github.com/matryer/is v1.4.1
 	github.com/rabbitmq/amqp091-go v1.9.0
-	github.com/rs/zerolog v1.31.0
 )
 
 require (
@@ -36,6 +35,7 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/oklog/run v1.0.0 // indirect
 	github.com/rogpeppe/go-internal v1.10.0 // indirect
+	github.com/rs/zerolog v1.32.0 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/stretchr/testify v1.8.4 // indirect
