@@ -18,19 +18,11 @@ generate:
 install-paramgen:
 	go install github.com/conduitio/conduit-connector-sdk/cmd/paramgen@latest
 
-install-tools:
-	@echo Installing tools from tools.go
-	@go list -e -f '{{ join .Imports "\n" }}' tools.go | xargs -tI % go install %
-	@go mod tidy
-
 lint:
 	golangci-lint run
 
 acceptance:
 	go test -v -race -count=1 -run TestAcceptance .
-
-acceptance-debug:
-	dlv test . -- -test.run TestAcceptance .
 
 up:
 	docker compose -f test/docker-compose.yml up --quiet-pull -d --wait 
