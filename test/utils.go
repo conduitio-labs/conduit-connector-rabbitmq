@@ -36,9 +36,11 @@ func SetupQueueName(t *testing.T, is *is.I) string {
 func DeleteQueue(is *is.I, queueName string) {
 	conn, err := amqp091.Dial(URL)
 	is.NoErr(err)
+	defer CloseResource(is, conn)
 
 	ch, err := conn.Channel()
 	is.NoErr(err)
+	defer CloseResource(is, ch)
 
 	// force queue delete
 	_, err = ch.QueueDelete(queueName, false, false, false)

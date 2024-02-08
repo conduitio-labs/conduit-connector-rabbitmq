@@ -137,8 +137,24 @@ func (s *Source) Ack(_ context.Context, position sdk.Position) error {
 }
 
 func (s *Source) Teardown(_ context.Context) error {
-	chcloseErr := closeResource(s.ch)
-	connCloseErr := closeResource(s.conn)
+	errs := make([]error, 0, 2)
+	if s.ch != nil {
+		if err := s.ch.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("failed to close channel: %w", err))
+		}
+	}
 
-	return errors.Join(chcloseErr, connCloseErr)
+	if s.conn != nil {
+		if err := s.conn.Close(); err != nil {
+			errs = append(errs, fmt.Errorf("failed to close connection: %w", err))
+		}
+	}
+
+	if err := errors.Join(errs...); err != nil {
+		return err
+	}
+
+	sdk.Logger(context.Background()).Debug().Msg("source teardown complete")
+
+	return nil
 }

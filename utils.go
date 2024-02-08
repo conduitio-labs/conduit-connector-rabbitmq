@@ -66,14 +66,3 @@ func metadataFromMessage(msg amqp091.Delivery) sdk.Metadata {
 
 	return metadata
 }
-
-type closable interface {
-	Close() error
-}
-
-func closeResource(c closable) error {
-	if c != nil {
-		return c.Close()
-	}
-	return nil
-}

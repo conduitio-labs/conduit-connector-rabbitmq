@@ -26,6 +26,12 @@ install-tools:
 lint:
 	golangci-lint run
 
+acceptance:
+	go test -v -race -count=1 -run TestAcceptance .
+
+acceptance-debug:
+	dlv test . -- -test.run TestAcceptance .
+
 up:
 	docker compose -f test/docker-compose.yml up --quiet-pull -d --wait 
 
