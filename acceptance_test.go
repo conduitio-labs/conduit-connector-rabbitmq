@@ -37,7 +37,7 @@ func init() {
 func TestAcceptance(t *testing.T) {
 	cfg := map[string]string{
 		"url":       test.URL,
-		"queueName": "test-queue2",
+		"queueName": "test-queue",
 	}
 	is := is.New(t)
 
