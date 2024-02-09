@@ -85,7 +85,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
 
-		sdk.Logger(ctx).Debug().Msgf("published message %s on %s", msgID, d.config.QueueName)
+		sdk.Logger(ctx).Debug().Str("MessageID", msgID).Str("queue", d.config.QueueName).Msg("published message")
 	}
 
 	return len(records), nil

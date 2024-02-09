@@ -28,8 +28,8 @@ import (
 )
 
 func init() {
-	// Uncomment this up a logger for tests to use. By default sdk.Logger log calls won't
-	// output anything
+	// Uncomment this to set up a logger for tests to use. By default
+	// sdk.Logger log calls won't output anything
 	// log := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	// zerolog.DefaultContextLogger = &log
 }
@@ -42,7 +42,7 @@ func TestAcceptance(t *testing.T) {
 	is := is.New(t)
 
 	sdk.AcceptanceTest(t, AcceptanceTestDriver{
-		sdk.ConfigurableAcceptanceTestDriver{
+		testDriver: testDriver{
 			Config: sdk.ConfigurableAcceptanceTestDriverConfig{
 				Connector:         Connector,
 				SourceConfig:      cfg,
@@ -62,9 +62,8 @@ func TestAcceptance(t *testing.T) {
 	})
 }
 
-type AcceptanceTestDriver struct {
-	sdk.ConfigurableAcceptanceTestDriver
-}
+type testDriver = sdk.ConfigurableAcceptanceTestDriver
+type AcceptanceTestDriver struct{ testDriver }
 
 func encodeData(bs sdk.Data, t *testing.T) sdk.Data {
 	keyBuff := bytes.NewBuffer([]byte{})
@@ -80,7 +79,7 @@ func encodeData(bs sdk.Data, t *testing.T) sdk.Data {
 // to generate a record with a simpler data randomizer.
 // The reason is that there's an unexpected behaviour with how rabbitmq handles message ids.
 func (d AcceptanceTestDriver) GenerateRecord(t *testing.T, op sdk.Operation) sdk.Record {
-	rec := d.ConfigurableAcceptanceTestDriver.GenerateRecord(t, op)
+	rec := d.testDriver.GenerateRecord(t, op)
 	rec.Key = encodeData(rec.Key, t)
 
 	return sdk.Record{
