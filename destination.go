@@ -80,7 +80,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			Body:        record.Payload.After.Bytes(),
 		}
 
-		err := d.ch.PublishWithContext(ctx, "", d.config.QueueName, false, false, msg)
+		err := d.ch.PublishWithContext(ctx, d.config.Exchange, d.config.QueueName, false, false, msg)
 		if err != nil {
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
