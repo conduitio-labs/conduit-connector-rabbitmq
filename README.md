@@ -30,8 +30,3 @@ The destination connector sends data from upstream systems to RabbitMQ via Condu
 | `queueName`   | The name of the RabbitMQ queue where messages will be published to.  | Yes      |               |
 | `exchange`    | is the name of the exchange to publish to                            | No       |               |
 | `contentType` | The MIME content type of the messages written to RabbitMQ.           | No       | `text/plain`  |
-
-## Caveats
-
-Currently there's an issue with how rabbitmq handles special characters in message ids. For some reason they get cut.
-There's no issues using base64 encoded message ids. This needs further investigation.

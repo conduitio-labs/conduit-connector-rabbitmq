@@ -15,10 +15,6 @@
 package rabbitmq
 
 import (
-	"bytes"
-	"encoding/base64"
-	"math/rand"
-	"strings"
 	"testing"
 	"time"
 
@@ -41,81 +37,23 @@ func TestAcceptance(t *testing.T) {
 	}
 	is := is.New(t)
 
-	sdk.AcceptanceTest(t, AcceptanceTestDriver{
-		testDriver: testDriver{
-			Config: sdk.ConfigurableAcceptanceTestDriverConfig{
-				Connector:         Connector,
-				SourceConfig:      cfg,
-				DestinationConfig: cfg,
-				BeforeTest: func(t *testing.T) {
-					queueName := test.SetupQueueName(t, is)
-					cfg["queueName"] = queueName
-				},
-				Skip: []string{
-					"TestSource_Configure_RequiredParams",
-					"TestDestination_Configure_RequiredParams",
-				},
-				WriteTimeout: time.Second * 10,
-				ReadTimeout:  time.Second * 10,
+	driver := sdk.ConfigurableAcceptanceTestDriver{
+		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
+			Connector:         Connector,
+			SourceConfig:      cfg,
+			DestinationConfig: cfg,
+			BeforeTest: func(t *testing.T) {
+				queueName := test.SetupQueueName(t, is)
+				cfg["queueName"] = queueName
 			},
-		},
-	})
-}
-
-type testDriver = sdk.ConfigurableAcceptanceTestDriver
-type AcceptanceTestDriver struct{ testDriver }
-
-func encodeData(bs sdk.Data, t *testing.T) sdk.Data {
-	keyBuff := bytes.NewBuffer([]byte{})
-	_, err := base64.NewEncoder(base64.StdEncoding, keyBuff).Write(bs.Bytes())
-	if err != nil {
-		t.Fatalf("failed to encode record: %v", err)
-	}
-
-	return sdk.RawData(keyBuff.Bytes())
-}
-
-// GenerateRecord overrides the sdk.ConfigurableAcceptanceTestDriver method
-// to generate a record with a simpler data randomizer.
-// The reason is that there's an unexpected behaviour with how rabbitmq handles message ids.
-func (d AcceptanceTestDriver) GenerateRecord(t *testing.T, op sdk.Operation) sdk.Record {
-	rec := d.testDriver.GenerateRecord(t, op)
-	rec.Key = encodeData(rec.Key, t)
-
-	return sdk.Record{
-		Position:  sdk.Position(randBytes()),
-		Operation: op,
-		Metadata: map[string]string{
-			randString(): randString(),
-			randString(): randString(),
-		},
-		Key: randData(),
-		Payload: sdk.Change{
-			Before: nil,
-			After:  randData(),
+			Skip: []string{
+				"TestSource_Configure_RequiredParams",
+				"TestDestination_Configure_RequiredParams",
+			},
+			WriteTimeout: 500 * time.Millisecond,
+			ReadTimeout:  500 * time.Millisecond,
 		},
 	}
+
+	sdk.AcceptanceTest(t, driver)
 }
-
-const charset = "abcdefghijklmnopqrstuvwxyz1234567890"
-
-func randBytes() []byte {
-	max := 32
-	var sb strings.Builder
-	sb.Grow(max)
-	sb.WriteString("test-")
-	for i := 0; i < max; i++ {
-		r := rand.Intn(len(charset))
-		if r == 0 {
-			r = 1
-		}
-		runeChar := charset[r-1 : r]
-
-		sb.WriteString(runeChar)
-	}
-
-	return []byte(sb.String())
-}
-
-func randData() sdk.Data { return sdk.RawData(randBytes()) }
-func randString() string { return string(randBytes()) }
