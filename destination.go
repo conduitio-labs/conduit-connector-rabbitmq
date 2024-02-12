@@ -52,30 +52,30 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Msg("connected to RabbitMQ")
+	sdk.Logger(ctx).Info().Msg("connected to RabbitMQ")
 
 	d.ch, err = d.conn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open channel: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Msgf("opened channel")
+	sdk.Logger(ctx).Info().Msgf("opened channel")
 
 	_, err = d.ch.QueueDeclare(d.config.QueueName, false, false, false, false, nil)
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Msgf("declared queue %s", d.config.QueueName)
+	sdk.Logger(ctx).Info().Msgf("declared queue %s", d.config.QueueName)
 
 	return nil
 }
 
 func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
 	for _, record := range records {
-		msgID := string(record.Key.Bytes())
+		msgID := string(record.Position)
 		msg := amqp091.Publishing{
 			MessageId:   msgID,
 			ContentType: d.config.ContentType,
-			Body:        record.Payload.After.Bytes(),
+			Body:        record.Bytes(),
 		}
 
 		err := d.ch.PublishWithContext(ctx, d.config.Exchange, d.config.QueueName, false, false, msg)
@@ -83,7 +83,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
 
-		sdk.Logger(ctx).Debug().Str("MessageID", msgID).Str("queue", d.config.QueueName).Msg("published message")
+		sdk.Logger(ctx).Trace().Str("MessageID", msgID).Str("queue", d.config.QueueName).Msg("published message")
 	}
 
 	return len(records), nil
@@ -107,7 +107,7 @@ func (d *Destination) Teardown(_ context.Context) error {
 		return err
 	}
 
-	sdk.Logger(context.Background()).Debug().Msg("destination teardown complete")
+	sdk.Logger(context.Background()).Info().Msg("destination teardown complete")
 
 	return nil
 }

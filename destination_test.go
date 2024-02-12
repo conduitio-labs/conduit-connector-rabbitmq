@@ -16,6 +16,8 @@ package rabbitmq
 
 import (
 	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"testing"
 
@@ -78,14 +80,26 @@ func TestDestination_Integration(t *testing.T) {
 		recs, err := ch.Consume(queueName, "", true, false, false, false, nil)
 		is.NoErr(err)
 
-		rec1 := <-recs
-		is.Equal(string(rec1.Body), "example message 0")
+		assertNextPayloadIs := func(expectedPayload string) {
+			delivery := <-recs
 
-		rec2 := <-recs
-		is.Equal(string(rec2.Body), "example message 1")
+			var rec struct {
+				Payload struct {
+					After string `json:"after"`
+				} `json:"payload"`
+			}
+			err = json.Unmarshal(delivery.Body, &rec)
+			is.NoErr(err)
 
-		rec3 := <-recs
-		is.Equal(string(rec3.Body), "example message 2")
+			body, err := base64.StdEncoding.DecodeString(rec.Payload.After)
+			is.NoErr(err)
+
+			is.Equal(string(body), expectedPayload)
+		}
+
+		assertNextPayloadIs("example message 0")
+		assertNextPayloadIs("example message 1")
+		assertNextPayloadIs("example message 2")
 	}
 }
 

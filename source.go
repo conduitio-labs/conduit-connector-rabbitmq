@@ -115,7 +115,7 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 
 		rec = sdk.Util.Source.NewRecordCreate(sdkPos, metadata, key, payload)
 
-		sdk.Logger(ctx).Debug().Msgf("read message %s from %s", msg.MessageId, s.queue.Name)
+		sdk.Logger(ctx).Trace().Msgf("read message %s from %s", msg.MessageId, s.queue.Name)
 
 		return rec, nil
 	}
