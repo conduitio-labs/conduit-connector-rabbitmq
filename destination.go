@@ -41,10 +41,13 @@ func (d *Destination) Parameters() map[string]sdk.Parameter {
 }
 
 func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err error) {
-	sdk.Logger(ctx).Info().Msg("Configuring Destination...")
 	d.config, err = newDestinationConfig(cfg)
+	if err != nil {
+		return fmt.Errorf("invalid config: %w", err)
+	}
 
-	return err
+	sdk.Logger(ctx).Debug().Msg("destination configured")
+	return nil
 }
 
 func (d *Destination) Open(ctx context.Context) (err error) {
@@ -52,13 +55,13 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
 	}
-	sdk.Logger(ctx).Info().Msg("connected to RabbitMQ")
+	sdk.Logger(ctx).Debug().Msg("connected to RabbitMQ")
 
 	d.ch, err = d.conn.Channel()
 	if err != nil {
 		return fmt.Errorf("failed to open channel: %w", err)
 	}
-	sdk.Logger(ctx).Info().Msgf("opened channel")
+	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
 	_, err = d.ch.QueueDeclare(d.config.QueueName, false, false, false, false, nil)
 	if err != nil {

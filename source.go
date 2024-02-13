@@ -43,12 +43,12 @@ func (s *Source) Parameters() map[string]sdk.Parameter {
 }
 
 func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
-	sdk.Logger(ctx).Info().Msg("Configuring Source...")
 	err := sdk.Util.ParseConfig(cfg, &s.config)
 	if err != nil {
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
+	sdk.Logger(ctx).Debug().Msg("source configured")
 	return nil
 }
 
@@ -89,7 +89,7 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to consume: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Msgf("created queue %v", s.queue.Name)
+	sdk.Logger(ctx).Debug().Msgf("subscribed to queue %s", s.queue.Name)
 
 	return nil
 }
