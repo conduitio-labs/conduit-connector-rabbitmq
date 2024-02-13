@@ -94,9 +94,9 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			ContentType: d.config.ContentType,
 			Body:        record.Bytes(),
 		}
-		
+
 		exchange := d.config.ExchangeName
-		routingKey :=d.config.RoutingKey 
+		routingKey := d.config.RoutingKey
 		if exchange == "" {
 			routingKey = d.config.QueueName
 		}

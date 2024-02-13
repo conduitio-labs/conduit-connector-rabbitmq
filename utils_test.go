@@ -33,7 +33,6 @@ func init() {
 	zerolog.DefaultContextLogger = &log
 }
 
-
 // cfgToMap converts a config struct to a map. This is useful for more type
 // safety on tests.
 func cfgToMap(cfg any) map[string]string {
