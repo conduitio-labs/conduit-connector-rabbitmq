@@ -24,9 +24,11 @@ The destination connector sends data from upstream systems to RabbitMQ via Condu
 
 ### Configuration Parameters
 
-| Name          | Description                                                          | Required | Default Value |
-|---------------|----------------------------------------------------------------------|----------|---------------|
-| `url`         | The RabbitMQ server's URL.                                           | Yes      |               |
-| `queueName`   | The name of the RabbitMQ queue where messages will be published to.  | Yes      |               |
-| `exchange`    | is the name of the exchange to publish to                            | No       |               |
-| `contentType` | The MIME content type of the messages written to RabbitMQ.           | No       | `text/plain`  |
+| Name           | Description                                                          | Required | Default Value |
+|----------------|----------------------------------------------------------------------|----------|---------------|
+| `url`          | The RabbitMQ server's URL.                                           | Yes      |               |
+| `queueName`    | The name of the RabbitMQ queue where messages will be published to.  | Yes      |               |
+| `exchangeName` | The name of the exchange to publish to                               | No       |               |
+| `exchangeType` | The type of the exchange to publish to                               | No       |               |
+| `routingKey`   | The routing key to use when publishing to an exchange                | No       |               |
+| `contentType`  | The MIME content type of the messages written to RabbitMQ.           | No       | `text/plain`  |
