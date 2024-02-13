@@ -15,10 +15,15 @@
 package rabbitmq
 
 import (
+	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
+	"testing"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/google/uuid"
+	"github.com/matryer/is"
 )
 
 func generate3Records(queueName string) []sdk.Record {
@@ -38,4 +43,65 @@ func generate3Records(queueName string) []sdk.Record {
 	}
 
 	return recs
+}
+
+func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey string) {
+	ctx := context.Background()
+	sharedCfg := Config{URL: testURL, QueueName: queueName}
+
+	dest := NewDestination()
+	destCfg := cfgToMap(DestinationConfig{
+		Config:       sharedCfg,
+		ExchangeName: exchangeName,
+		ExchangeType: exchangeType,
+		RoutingKey:   routingKey,
+	})
+	err := dest.Configure(ctx, destCfg)
+	is.NoErr(err)
+
+	err = dest.Open(ctx)
+	is.NoErr(err)
+	defer teardownResource(ctx, is, dest)
+
+	recs := generate3Records(queueName)
+	_, err = dest.Write(ctx, recs)
+	is.NoErr(err)
+
+	src := NewSource().(*Source)
+	srcCfg := cfgToMap(SourceConfig{Config: sharedCfg})
+	err = src.Configure(ctx, srcCfg)
+	is.NoErr(err)
+
+	err = src.Open(ctx, nil)
+	is.NoErr(err)
+	defer teardownResource(ctx, is, src)
+
+	assertNextPayloadIs := func(expectedPayload string) {
+		readRec, err := src.Read(ctx)
+		is.NoErr(err)
+
+		var rec struct {
+			Payload struct {
+				After string `json:"after"`
+			} `json:"payload"`
+		}
+		err = json.Unmarshal(readRec.Payload.After.Bytes(), &rec)
+		is.NoErr(err)
+
+		body, err := base64.StdEncoding.DecodeString(rec.Payload.After)
+		is.NoErr(err)
+
+		is.Equal(string(body), expectedPayload)
+	}
+
+	assertNextPayloadIs("example message 0")
+	assertNextPayloadIs("example message 1")
+	assertNextPayloadIs("example message 2")
+}
+
+func TestDestination_ExchangeWorks(t *testing.T) {
+	is := is.New(t)
+	testExchange(is, "testQueue", "testDirectExchange", "direct", "specificRoutingKey")
+	testExchange(is, "testQueue", "testFanoutExchange", "fanout", "")
+	testExchange(is, "testQueue", "testTopicExchange", "topic", "specificRoutingKey")
 }

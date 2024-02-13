@@ -41,8 +41,14 @@ type DestinationConfig struct {
 	// ContentType is the MIME content type of the messages written to rabbitmq
 	ContentType string `json:"contentType" default:"text/plain"`
 
-	// Exchange is the name of the exchange to publish to
-	Exchange string `json:"exchange" default:""`
+	// ExchangeName is the name of the exchange to publish to
+	ExchangeName string `json:"exchangeName" default:""`
+
+	// ExchangeType is the type of the exchange to publish to
+	ExchangeType string `json:"exchangeType" default:"direct"`
+
+	// RoutingKey is the routing key to use when publishing to an exchange
+	RoutingKey string `json:"routingKey" default:""`
 }
 
 func newDestinationConfig(cfg map[string]string) (DestinationConfig, error) {

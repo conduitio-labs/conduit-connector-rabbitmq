@@ -67,7 +67,21 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
-	sdk.Logger(ctx).Info().Msgf("declared queue %s", d.config.QueueName)
+	sdk.Logger(ctx).Debug().Msgf("declared queue %s", d.config.QueueName)
+
+	if d.config.ExchangeName != "" {
+		err = d.ch.ExchangeDeclare(d.config.ExchangeName, d.config.ExchangeType, false, false, false, false, nil)
+		if err != nil {
+			return fmt.Errorf("failed to declare exchange: %w", err)
+		}
+		sdk.Logger(ctx).Debug().Msgf("declared exchange %s", d.config.ExchangeName)
+
+		err = d.ch.QueueBind(d.config.QueueName, d.config.RoutingKey, d.config.ExchangeName, false, nil)
+		if err != nil {
+			return fmt.Errorf("failed to bind queue to exchange: %w", err)
+		}
+		sdk.Logger(ctx).Debug().Msgf("bound queue %s to exchange %s with routing key %s", d.config.QueueName, d.config.ExchangeName, d.config.RoutingKey)
+	}
 
 	return nil
 }
@@ -80,8 +94,14 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			ContentType: d.config.ContentType,
 			Body:        record.Bytes(),
 		}
+		
+		exchange := d.config.ExchangeName
+		routingKey :=d.config.RoutingKey 
+		if exchange == "" {
+			routingKey = d.config.QueueName
+		}
 
-		err := d.ch.PublishWithContext(ctx, d.config.Exchange, d.config.QueueName, false, false, msg)
+		err := d.ch.PublishWithContext(ctx, exchange, routingKey, false, false, msg)
 		if err != nil {
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
