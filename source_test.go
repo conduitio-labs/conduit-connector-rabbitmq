@@ -33,13 +33,6 @@ func TestTeardownSource_NoOpen(t *testing.T) {
 	is.NoErr(err)
 }
 
-func newSourceCfg(queueName string) map[string]string {
-	return map[string]string{
-		"url":       test.URL,
-		"queueName": queueName,
-	}
-}
-
 func TestSource_Integration_RestartFull(t *testing.T) {
 	t.Parallel()
 
@@ -47,7 +40,9 @@ func TestSource_Integration_RestartFull(t *testing.T) {
 	is := is.New(t)
 
 	queueName := test.SetupQueueName(t, is)
-	cfgMap := newSourceCfg(queueName)
+	cfgMap := cfgToMap(SourceConfig{
+		Config: Config{URL: test.URL, QueueName: queueName},
+	})
 
 	recs1 := generateRabbitmqMsgs(1, 3)
 	go produceRabbitmqMsgs(ctx, is, queueName, recs1)
@@ -66,7 +61,9 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 	ctx := context.Background()
 	queueName := test.SetupQueueName(t, is)
 
-	cfgMap := newSourceCfg(queueName)
+	cfgMap := cfgToMap(SourceConfig{
+		Config: Config{URL: test.URL, QueueName: queueName},
+	})
 
 	recs1 := generateRabbitmqMsgs(1, 3)
 	go produceRabbitmqMsgs(ctx, is, queueName, recs1)

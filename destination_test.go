@@ -35,13 +35,6 @@ func TestTeardownDestination_NoOpen(t *testing.T) {
 	is.NoErr(err)
 }
 
-func newDestinationCfg(queueName string) map[string]string {
-	return map[string]string{
-		"url":       test.URL,
-		"queueName": queueName,
-	}
-}
-
 func TestDestination_Integration(t *testing.T) {
 	ctx := context.Background()
 	is := is.New(t)
@@ -50,7 +43,12 @@ func TestDestination_Integration(t *testing.T) {
 
 	{
 		destination := NewDestination()
-		cfg := newDestinationCfg(queueName)
+		cfg := cfgToMap(DestinationConfig{
+			Config: Config{
+				URL:       test.URL,
+				QueueName: queueName,
+			},
+		})
 
 		err := destination.Configure(ctx, cfg)
 		is.NoErr(err)
