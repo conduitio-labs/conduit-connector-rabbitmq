@@ -17,11 +17,22 @@ package rabbitmq
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/matryer/is"
 	"github.com/rabbitmq/amqp091-go"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 )
+
+func init() {
+	// Uncomment this to set up a logger for tests to use. By default
+	// sdk.Logger log calls won't output anything
+	log := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	zerolog.DefaultContextLogger = &log
+}
+
 
 // cfgToMap converts a config struct to a map. This is useful for more type
 // safety on tests.

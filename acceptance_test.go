@@ -18,21 +18,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alarbada/conduit-connector-rabbitmq/test"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/matryer/is"
 )
 
-func init() {
-	// Uncomment this to set up a logger for tests to use. By default
-	// sdk.Logger log calls won't output anything
-	// log := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	// zerolog.DefaultContextLogger = &log
-}
-
 func TestAcceptance(t *testing.T) {
 	cfg := map[string]string{
-		"url":       test.URL,
+		"url":       testURL,
 		"queueName": "test-queue",
 	}
 	is := is.New(t)
@@ -43,7 +35,7 @@ func TestAcceptance(t *testing.T) {
 			SourceConfig:      cfg,
 			DestinationConfig: cfg,
 			BeforeTest: func(t *testing.T) {
-				queueName := test.SetupQueueName(t, is)
+				queueName := setupQueueName(t, is)
 				cfg["queueName"] = queueName
 			},
 			Skip: []string{
