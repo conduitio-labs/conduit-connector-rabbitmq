@@ -20,7 +20,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/alarbada/conduit-connector-rabbitmq/test"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/matryer/is"
 	"github.com/rabbitmq/amqp091-go"
@@ -39,9 +38,9 @@ func TestSource_Integration_RestartFull(t *testing.T) {
 	ctx := context.Background()
 	is := is.New(t)
 
-	queueName := test.SetupQueueName(t, is)
+	queueName := setupQueueName(t, is)
 	cfgMap := cfgToMap(SourceConfig{
-		Config: Config{URL: test.URL, QueueName: queueName},
+		Config: Config{URL: testURL, QueueName: queueName},
 	})
 
 	recs1 := generateRabbitmqMsgs(1, 3)
@@ -59,10 +58,10 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 
 	is := is.New(t)
 	ctx := context.Background()
-	queueName := test.SetupQueueName(t, is)
+	queueName := setupQueueName(t, is)
 
 	cfgMap := cfgToMap(SourceConfig{
-		Config: Config{URL: test.URL, QueueName: queueName},
+		Config: Config{URL: testURL, QueueName: queueName},
 	})
 
 	recs1 := generateRabbitmqMsgs(1, 3)
@@ -104,7 +103,7 @@ func generateRabbitmqMsgs(from, to int) []amqp091.Publishing {
 }
 
 func produceRabbitmqMsgs(ctx context.Context, is *is.I, queueName string, msgs []amqp091.Publishing) {
-	conn, err := amqp091.Dial(test.URL)
+	conn, err := amqp091.Dial(testURL)
 	is.NoErr(err)
 
 	defer conn.Close()
