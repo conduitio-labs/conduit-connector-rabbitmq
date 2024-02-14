@@ -48,7 +48,7 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
-	if shouldParseTLSConfig(d.config.Config) {
+	if shouldParseTLSConfig(ctx, d.config.Config) {
 		d.tlsConfig, err = parseTLSConfig(ctx, d.config.Config)
 		if err != nil {
 			return fmt.Errorf("failed to parse TLS config: %w", err)

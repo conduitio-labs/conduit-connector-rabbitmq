@@ -85,8 +85,15 @@ func metadataFromMessage(msg amqp091.Delivery) sdk.Metadata {
 	return metadata
 }
 
-func shouldParseTLSConfig(cfg Config) bool {
-	return cfg.ClientCert != "" && cfg.ClientKey != "" && cfg.CACert != ""
+func shouldParseTLSConfig(ctx context.Context, cfg Config) bool {
+	areAllSet := cfg.ClientCert != "" && cfg.ClientKey != "" && cfg.CACert != ""
+	someAreSet := cfg.ClientCert != "" || cfg.ClientKey != "" || cfg.CACert != ""
+
+	if someAreSet && !areAllSet {
+		sdk.Logger(ctx).Error().Msg("some TLS config is set, but not all; ignoring TLS config")
+	}
+
+	return areAllSet
 }
 
 func parseTLSConfig(ctx context.Context, cfg Config) (*tls.Config, error) {
@@ -111,9 +118,8 @@ func parseTLSConfig(ctx context.Context, cfg Config) (*tls.Config, error) {
 		MinVersion: tls.VersionTLS12,
 		MaxVersion: tls.VersionTLS13,
 
-		Certificates:       []tls.Certificate{cert},
-		RootCAs:            caCertPool,
-		InsecureSkipVerify: false,
+		Certificates: []tls.Certificate{cert},
+		RootCAs:      caCertPool,
 	}
 
 	// version will be overwritten at compile time when building a release,
