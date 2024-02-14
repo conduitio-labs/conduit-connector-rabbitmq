@@ -108,9 +108,18 @@ func parseTLSConfig(ctx context.Context, cfg Config) (*tls.Config, error) {
 	caCertPool.AppendCertsFromPEM(caCert)
 
 	tlsConfig := &tls.Config{
+		MinVersion: tls.VersionTLS12,
+		MaxVersion: tls.VersionTLS13,
+
 		Certificates:       []tls.Certificate{cert},
 		RootCAs:            caCertPool,
-		InsecureSkipVerify: cfg.TLSInsecureSkipVerify,
+		InsecureSkipVerify: false,
+	}
+
+	// version will be overwritten at compile time when building a release,
+	// so this should only be true when running in development mode.
+	if version == "(devel)" {
+		tlsConfig.InsecureSkipVerify = true
 	}
 
 	return tlsConfig, nil

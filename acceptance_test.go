@@ -60,12 +60,11 @@ func TestAcceptance_TLS(t *testing.T) {
 	is := is.New(t)
 
 	sharedCfg := Config{
-		URL:                   testURLTLS,
-		QueueName:             "test-queue",
-		ClientCert:            "./test/client.cert.pem",
-		ClientKey:             "./test/client.key.pem",
-		CACert:                "./test/ca.cert.pem",
-		TLSInsecureSkipVerify: true,
+		URL:        testURLTLS,
+		QueueName:  "test-queue",
+		ClientCert: "./test/client.cert.pem",
+		ClientKey:  "./test/client.key.pem",
+		CACert:     "./test/ca.cert.pem",
 	}
 	cfg := cfgToMap(sharedCfg)
 	ctx := context.Background()
