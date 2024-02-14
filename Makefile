@@ -29,3 +29,13 @@ up:
 
 down:
 	docker compose -f test/docker-compose.yml down -v --remove-orphans
+
+up-tls:
+	docker compose -f test/docker-compose-tls.yml up --quiet-pull -d --wait 
+
+
+down-tls:
+	docker compose -f test/docker-compose-tls.yml down -v --remove-orphans
+
+clean:
+	rm -rf test/*.pem
