@@ -29,6 +29,12 @@ type Config struct {
 
 	// QueueName is the name of the queue to consume from / publish to
 	QueueName string `json:"queueName" validate:"required"`
+
+	ClientCert string `json:"clientCert"`
+	ClientKey  string `json:"clientKey"`
+	CACert     string `json:"caCert"`
+
+	TLSInsecureSkipVerify bool `json:"tlsInsecureSkipVerify"`
 }
 
 type SourceConfig struct {

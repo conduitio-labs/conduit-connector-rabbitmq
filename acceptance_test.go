@@ -15,6 +15,8 @@
 package rabbitmq
 
 import (
+	"context"
+	"os"
 	"testing"
 	"time"
 
@@ -36,6 +38,48 @@ func TestAcceptance(t *testing.T) {
 			DestinationConfig: cfg,
 			BeforeTest: func(t *testing.T) {
 				queueName := setupQueueName(t, is)
+				cfg["queueName"] = queueName
+			},
+			Skip: []string{
+				"TestSource_Configure_RequiredParams",
+				"TestDestination_Configure_RequiredParams",
+			},
+			WriteTimeout: 500 * time.Millisecond,
+			ReadTimeout:  500 * time.Millisecond,
+		},
+	}
+
+	sdk.AcceptanceTest(t, driver)
+}
+
+func TestAcceptance_TLS(t *testing.T) {
+	if os.Getenv("RABBITMQ_TLS") != "true" {
+		t.Skip()
+	}
+
+	is := is.New(t)
+
+	sharedCfg := Config{
+		URL:                   testURLTLS,
+		QueueName:             "test-queue",
+		ClientCert:            "./test/client.cert.pem",
+		ClientKey:             "./test/client.key.pem",
+		CACert:                "./test/ca.cert.pem",
+		TLSInsecureSkipVerify: true,
+	}
+	cfg := cfgToMap(sharedCfg)
+	ctx := context.Background()
+
+	tlsConfig, err := parseTLSConfig(ctx, sharedCfg)
+	is.NoErr(err)
+
+	driver := sdk.ConfigurableAcceptanceTestDriver{
+		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
+			Connector:         Connector,
+			SourceConfig:      cfg,
+			DestinationConfig: cfg,
+			BeforeTest: func(t *testing.T) {
+				queueName := setupQueueNameTLS(t, is, tlsConfig)
 				cfg["queueName"] = queueName
 			},
 			Skip: []string{

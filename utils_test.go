@@ -16,21 +16,20 @@ package rabbitmq
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/json"
-	"os"
+	"fmt"
 	"testing"
 
 	"github.com/matryer/is"
 	"github.com/rabbitmq/amqp091-go"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 )
 
 func init() {
 	// Uncomment this to set up a logger for tests to use. By default
 	// sdk.Logger log calls won't output anything
-	log := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	zerolog.DefaultContextLogger = &log
+	// log := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	// zerolog.DefaultContextLogger = &log
 }
 
 // cfgToMap converts a config struct to a map. This is useful for more type
@@ -41,29 +40,59 @@ func cfgToMap(cfg any) map[string]string {
 		panic(err)
 	}
 
-	m := map[string]string{}
-	err = json.Unmarshal(bs, &m)
+	mAny := map[string]any{}
+	err = json.Unmarshal(bs, &mAny)
 	if err != nil {
 		panic(err)
+	}
+
+	m := map[string]string{}
+	for k, v := range mAny {
+		switch v := v.(type) {
+		case string:
+			m[k] = v
+		case bool:
+			m[k] = fmt.Sprintf("%t", v)
+		default:
+			panic(fmt.Errorf("unsupported type: %T", v))
+		}
 	}
 
 	return m
 }
 
-const testURL = "amqp://guest:guest@localhost:5672"
+const (
+	testURL    = "amqp://guest:guest@localhost:5672"
+	testURLTLS = "amqps://guest:guest@localhost:5671"
+)
 
 // setupQueueName creates a new topic name for the test and deletes it if it
 // exists, so that the test can start from a clean slate.
 func setupQueueName(t *testing.T, is *is.I) string {
 	queueName := "rabbitmq.queue." + t.Name()
-	deleteQueue(is, queueName)
+	deleteQueue(is, queueName, nil)
 
 	return queueName
 }
 
-func deleteQueue(is *is.I, queueName string) {
-	conn, err := amqp091.Dial(testURL)
-	is.NoErr(err)
+// setupQueueNameTLS does the same as setupQueueName but for TLS connections.
+func setupQueueNameTLS(t *testing.T, is *is.I, tlsConfig *tls.Config) string {
+	queueName := "rabbitmq.queue." + t.Name()
+	deleteQueue(is, queueName, tlsConfig)
+
+	return queueName
+}
+
+func deleteQueue(is *is.I, queueName string, tlsConfig *tls.Config) {
+	var conn *amqp091.Connection
+	var err error
+	if tlsConfig != nil {
+		conn, err = amqp091.DialTLS(testURLTLS, tlsConfig)
+		is.NoErr(err)
+	} else {
+		conn, err = amqp091.Dial(testURL)
+		is.NoErr(err)
+	}
 	defer closeResource(is, conn)
 
 	ch, err := conn.Channel()

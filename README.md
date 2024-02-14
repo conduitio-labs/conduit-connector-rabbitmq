@@ -32,3 +32,4 @@ The destination connector sends data from upstream systems to RabbitMQ via Condu
 | `exchangeType` | The type of the exchange to publish to                               | No       |               |
 | `routingKey`   | The routing key to use when publishing to an exchange                | No       |               |
 | `contentType`  | The MIME content type of the messages written to RabbitMQ.           | No       | `text/plain`  |
+

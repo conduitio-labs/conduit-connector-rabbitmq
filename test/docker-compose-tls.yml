@@ -1,14 +1,11 @@
 version: "3"
 services:
-  rabbitmq-tls:
+  rabbitmq:
     stop_grace_period: 100ms
     image: rabbitmq:3.12-management
     container_name: rabbitmq
     ports:
       - "5671:5671"
-      - "5672:5672"
-      - "8443:8443"
-      - "15672:15672"
 
     healthcheck:
       test: rabbitmq-diagnostics -q ping

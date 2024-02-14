@@ -15,8 +15,12 @@
 package rabbitmq
 
 import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"os"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/rabbitmq/amqp091-go"
@@ -79,4 +83,43 @@ func metadataFromMessage(msg amqp091.Delivery) sdk.Metadata {
 	setKey("rabbitmq.routingKey", msg.RoutingKey)
 
 	return metadata
+}
+
+func shouldParseTLSConfig(cfg Config) bool {
+	return cfg.ClientCert != "" && cfg.ClientKey != "" && cfg.CACert != ""
+}
+
+func parseTLSConfig(ctx context.Context, cfg Config) (*tls.Config, error) {
+	cert, err := tls.LoadX509KeyPair(cfg.ClientCert, cfg.ClientKey)
+	if err != nil {
+		return nil, fmt.Errorf("error loading client cert: %w", err)
+	}
+
+	sdk.Logger(ctx).Debug().Msg("loaded client cert and key")
+
+	caCert, err := os.ReadFile(cfg.CACert)
+	if err != nil {
+		return nil, fmt.Errorf("error loading CA cert: %w", err)
+	}
+
+	sdk.Logger(ctx).Debug().Msg("loaded CA cert")
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	tlsConfig := &tls.Config{
+		Certificates:       []tls.Certificate{cert},
+		RootCAs:            caCertPool,
+		InsecureSkipVerify: cfg.TLSInsecureSkipVerify,
+	}
+
+	return tlsConfig, nil
+}
+
+func ampqDial(url string, tlsConfig *tls.Config) (*amqp091.Connection, error) {
+	if tlsConfig != nil {
+		return amqp091.DialTLS(url, tlsConfig)
+	}
+
+	return amqp091.Dial(url)
 }
