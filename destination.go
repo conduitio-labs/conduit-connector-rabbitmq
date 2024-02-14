@@ -50,6 +50,12 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
+	d.exchange = d.config.ExchangeName
+	d.routingKey = d.config.RoutingKey
+	if d.exchange == "" {
+		d.routingKey = d.config.QueueName
+	}
+
 	if shouldParseTLSConfig(ctx, d.config.Config) {
 		d.tlsConfig, err = parseTLSConfig(ctx, d.config.Config)
 		if err != nil {
@@ -58,12 +64,6 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 
 		sdk.Logger(ctx).Debug().Msg("source configured with TLS")
 		return nil
-	}
-
-	d.exchange = d.config.ExchangeName
-	d.routingKey = d.config.RoutingKey
-	if d.exchange == "" {
-		d.routingKey = d.config.QueueName
 	}
 
 	sdk.Logger(ctx).Debug().Msg("destination configured")
