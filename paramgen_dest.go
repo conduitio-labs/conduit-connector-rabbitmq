@@ -11,19 +11,19 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 	return map[string]sdk.Parameter{
 		"caCert": {
 			Default:     "",
-			Description: "",
+			Description: "caCert is the path to the CA certificate to use for TLS",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
 		"clientCert": {
 			Default:     "",
-			Description: "clientCert, ClientKey, and CACert are the paths to the client certificate, client key, and CA certificate to use for TLS",
+			Description: "clientCert is the path to the client certificate to use for TLS",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
 		"clientKey": {
 			Default:     "",
-			Description: "",
+			Description: "clientKey is the path to the client key to use for TLS",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},

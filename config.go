@@ -30,11 +30,14 @@ type Config struct {
 	// QueueName is the name of the queue to consume from / publish to
 	QueueName string `json:"queueName" validate:"required"`
 
-	// ClientCert, ClientKey, and CACert are the paths to the client certificate,
-	// client key, and CA certificate to use for TLS
+	// ClientCert is the path to the client certificate to use for TLS
 	ClientCert string `json:"clientCert"`
-	ClientKey  string `json:"clientKey"`
-	CACert     string `json:"caCert"`
+
+	// ClientKey is the path to the client key to use for TLS
+	ClientKey string `json:"clientKey"`
+
+	// CACert is the path to the CA certificate to use for TLS
+	CACert string `json:"caCert"`
 }
 
 type SourceConfig struct {
