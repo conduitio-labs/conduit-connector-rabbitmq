@@ -5,7 +5,7 @@ Integration of [Conduit](https://conduit.io) with RabbitMQ.
 Run `make build` to compile the connector.
 
 ## Testing
-Execute `make test` to perform all tests.
+Execute `make test` to perform all non-tls tests. Execute `make test-tls` for the tls tests.
 
 Use the Docker Compose file located at `test/docker-compose.yml` for running the required resources locally.
 
