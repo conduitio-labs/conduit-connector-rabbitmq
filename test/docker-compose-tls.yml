@@ -1,7 +1,6 @@
 version: "3"
 services:
   rabbitmq:
-    stop_grace_period: 100ms
     image: rabbitmq:3.12-management
     container_name: rabbitmq
     ports:
@@ -9,9 +8,9 @@ services:
 
     healthcheck:
       test: rabbitmq-diagnostics -q ping
-      interval: 2s
+      interval: 5s
       timeout: 20s
-      retries: 100
-      start_period: 100ms
+      retries: 6
+      start_period: 30s
     volumes:
       - .:/etc/rabbitmq
