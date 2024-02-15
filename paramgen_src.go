@@ -9,6 +9,24 @@ import (
 
 func (SourceConfig) Parameters() map[string]sdk.Parameter {
 	return map[string]sdk.Parameter{
+		"caCert": {
+			Default:     "",
+			Description: "",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"clientCert": {
+			Default:     "",
+			Description: "clientCert, ClientKey, and CACert are the paths to the client certificate, client key, and CA certificate to use for TLS",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"clientKey": {
+			Default:     "",
+			Description: "",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
 		"queueName": {
 			Default:     "",
 			Description: "queueName is the name of the queue to consume from / publish to",

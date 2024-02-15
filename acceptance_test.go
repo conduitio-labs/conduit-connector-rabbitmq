@@ -59,15 +59,6 @@ func TestAcceptance_TLS(t *testing.T) {
 
 	is := is.New(t)
 
-// 	_, err := os.ReadFile("./test/client.cert.pem")
-// 	is.NoErr(err)
-// 	_, err = os.ReadFile("./test/client.key.pem")
-// 	is.NoErr(err)
-// 	_, err = os.ReadFile("./test/ca.cert.pem")
-// 	is.NoErr(err)
-
-	// return
-
 	sharedCfg := Config{
 		URL:        testURLTLS,
 		QueueName:  "test-queue",

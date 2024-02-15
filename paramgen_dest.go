@@ -9,9 +9,39 @@ import (
 
 func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 	return map[string]sdk.Parameter{
+		"caCert": {
+			Default:     "",
+			Description: "",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"clientCert": {
+			Default:     "",
+			Description: "clientCert, ClientKey, and CACert are the paths to the client certificate, client key, and CA certificate to use for TLS",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"clientKey": {
+			Default:     "",
+			Description: "",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
 		"contentType": {
 			Default:     "text/plain",
 			Description: "contentType is the MIME content type of the messages written to rabbitmq",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"exchangeName": {
+			Default:     "",
+			Description: "exchangeName is the name of the exchange to publish to",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"exchangeType": {
+			Default:     "direct",
+			Description: "exchangeType is the type of the exchange to publish to",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
@@ -22,6 +52,12 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 			Validations: []sdk.Validation{
 				sdk.ValidationRequired{},
 			},
+		},
+		"routingKey": {
+			Default:     "",
+			Description: "routingKey is the routing key to use when publishing to an exchange",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
 		},
 		"url": {
 			Default:     "",

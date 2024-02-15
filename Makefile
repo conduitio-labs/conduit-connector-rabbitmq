@@ -6,9 +6,8 @@ build:
 	go build -ldflags "-X 'github.com/alarbada/conduit-connector-rabbitmq.version=${VERSION}'" -o rabbitmq cmd/connector/main.go
 
 test:
-	# run required docker containers, execute integration tests, stop containers after tests
 	docker compose -f test/docker-compose.yml up --quiet-pull -d --wait 
-	go test $(GOTEST_FLAGS) -v -race ./...; ret=$$?; \
+	go test $(GOTEST_FLAGS) -v -race .; ret=$$?; \
 		docker compose -f test/docker-compose.yml down; \
 		exit $$ret
 
@@ -47,6 +46,3 @@ up-tls:
 
 down-tls:
 	docker compose -f test/docker-compose-tls.yml down -v --remove-orphans
-
-clean:
-	rm -rf test/*.pem
