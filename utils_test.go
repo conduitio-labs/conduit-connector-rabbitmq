@@ -53,6 +53,11 @@ func cfgToMap(cfg any) map[string]string {
 			m[k] = v
 		case bool:
 			m[k] = fmt.Sprintf("%t", v)
+		case map[string]any:
+			parsed := cfgToMap(v)
+			for k2, v := range parsed {
+				m[k+"."+k2] = v
+			}
 		default:
 			panic(fmt.Errorf("unsupported type: %T", v))
 		}
