@@ -124,12 +124,33 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 	for _, record := range records {
 		msgID := string(record.Position)
 		msg := amqp091.Publishing{
-			MessageId:   msgID,
-			ContentType: d.config.ContentType,
-			Body:        record.Bytes(),
+			ContentType:     d.config.Delivery.ContentType,
+			ContentEncoding: d.config.Delivery.ContentEncoding,
+			DeliveryMode:    d.config.Delivery.DeliveryMode,
+			Priority:        d.config.Delivery.Priority,
+			CorrelationId:   d.config.Delivery.CorrelationID,
+			ReplyTo:         d.config.Delivery.ReplyTo,
+
+			MessageId: msgID,
+			Type:      d.config.Delivery.MessageTypeName,
+			UserId:    d.config.Delivery.UserID,
+			AppId:     d.config.Delivery.AppID,
+			Body:      record.Bytes(),
+
+			// TODO: study this field, I'm not sure what's supposed to do
+			Expiration: "",
 		}
 
-		err := d.ch.PublishWithContext(ctx, d.exchange, d.routingKey, false, false, msg)
+		if createdAt, err := record.Metadata.GetCreatedAt(); err != nil {
+			msg.Timestamp = createdAt
+		}
+
+		err := d.ch.PublishWithContext(
+			ctx, d.exchange, d.routingKey,
+			d.config.Delivery.Mandatory,
+			d.config.Delivery.Immediate,
+			msg,
+		)
 		if err != nil {
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}

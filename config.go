@@ -70,12 +70,29 @@ type ExchangeConfig struct {
 	NoWait bool `json:"noWait" default:"false"`
 }
 
-type DestinationConfig struct {
-	Config
+type DeliveryConfig struct {
+	ContentEncoding string `json:"contentEncoding"`
 
 	// ContentType is the MIME content type of the messages written to rabbitmq
 	ContentType string `json:"contentType" default:"text/plain"`
 
+	DeliveryMode    uint8  `json:"deliveryMode" default:"2"`
+	Priority        uint8  `json:"priority" default:"0"`
+	CorrelationID   string `json:"correlationID" default:""`
+	ReplyTo         string `json:"replyTo" default:""`
+	MessageTypeName string `json:"messageTypeName" default:""`
+	UserID          string `json:"userID" default:""`
+	AppID           string `json:"appID" default:""`
+
+
+	Mandatory bool `json:"mandatory" default:"false"`
+	Immediate bool `json:"immediate" default:"false"`
+}
+
+type DestinationConfig struct {
+	Config
+
+	Delivery DeliveryConfig `json:"delivery"`
 	Queue    QueueConfig    `json:"queue"`
 	Exchange ExchangeConfig `json:"exchange"`
 
@@ -90,8 +107,8 @@ func newDestinationConfig(cfg map[string]string) (DestinationConfig, error) {
 		return destCfg, fmt.Errorf("invalid config: %w", err)
 	}
 
-	if destCfg.ContentType == "" {
-		destCfg.ContentType = "text/plain"
+	if destCfg.Delivery.ContentType == "" {
+		destCfg.Delivery.ContentType = "text/plain"
 	}
 
 	return destCfg, nil

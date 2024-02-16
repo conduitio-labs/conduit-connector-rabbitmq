@@ -51,8 +51,10 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 
 	dest := NewDestination()
 	destCfg := cfgToMap(DestinationConfig{
-		Config:      sharedCfg,
-		ContentType: "text/plain",
+		Config: sharedCfg,
+		Delivery: DeliveryConfig{
+			ContentType: "text/plain",
+		},
 		Queue: QueueConfig{
 			Durable:    false,
 			AutoDelete: false,
