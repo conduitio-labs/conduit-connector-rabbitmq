@@ -38,7 +38,7 @@ The destination connector sends data from upstream systems to RabbitMQ via Condu
 | `contentType`           | The MIME content type of the messages written to RabbitMQ.          | No       | `text/plain`  |
 | `delivery.contentEncoding` | The content encoding for the message.                                       | No       |                |
 | `delivery.deliveryMode`    | Delivery mode of the message. Non-persistent (1) or persistent (2).        | No       | `2`            |
-| `elivery.priority`        | The priority of the message.                                               | No       | `0`            |
+| `delivery.priority`        | The priority of the message.                                               | No       | `0`            |
 | `delivery.correlationID`   | The correlation id associated with the message.                            | No       |                |
 | `delivery.replyTo`      | Address to reply to.                                                     | No       |                |
 | `delivery.messageTypeName`| The type name of the message.                                              | No       |                |
