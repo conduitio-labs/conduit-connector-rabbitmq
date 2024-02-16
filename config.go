@@ -71,21 +71,37 @@ type ExchangeConfig struct {
 }
 
 type DeliveryConfig struct {
+	// ContentEncoding specifies the encoding of the message content.
 	ContentEncoding string `json:"contentEncoding"`
 
-	// ContentType is the MIME content type of the messages written to rabbitmq
+	// ContentType specifies the MIME type of the message content. Default is "text/plain".
 	ContentType string `json:"contentType" default:"text/plain"`
 
-	DeliveryMode    uint8  `json:"deliveryMode" default:"2"`
-	Priority        uint8  `json:"priority" default:"0"`
-	CorrelationID   string `json:"correlationID" default:""`
-	ReplyTo         string `json:"replyTo" default:""`
+	// DeliveryMode indicates the message delivery mode. Non-persistent (1) or persistent (2). Default is 2 (persistent).
+	DeliveryMode uint8 `json:"deliveryMode" default:"2"`
+
+	// Priority specifies the message priority. Ranges from 0 to 9. Default is 0.
+	Priority uint8 `json:"priority" default:"0"`
+
+	// CorrelationID is used to correlate RPC responses with requests.
+	CorrelationID string `json:"correlationID" default:""`
+
+	// ReplyTo specifies the address to reply to.
+	ReplyTo string `json:"replyTo" default:""`
+
+	// MessageTypeName specifies the message type name.
 	MessageTypeName string `json:"messageTypeName" default:""`
-	UserID          string `json:"userID" default:""`
-	AppID           string `json:"appID" default:""`
 
+	// UserID specifies the user who created the message. Useful for publishers.
+	UserID string `json:"userID" default:""`
 
+	// AppID specifies the application that created the message.
+	AppID string `json:"appID" default:""`
+
+	// Mandatory indicates if the message is mandatory. If true, tells the server to return the message if it cannot be routed to a queue.
 	Mandatory bool `json:"mandatory" default:"false"`
+
+	// Immediate indicates if the message should be treated as immediate. If true, the message is not queued if no consumers are on the matching queue.
 	Immediate bool `json:"immediate" default:"false"`
 }
 

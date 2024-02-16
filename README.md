@@ -36,6 +36,16 @@ The destination connector sends data from upstream systems to RabbitMQ via Condu
 | `clientKey`             | Path to the client's key for TLS.                                   | No       |               |
 | `caCert`                | Path to the CA (Certificate Authority) certificate for TLS.         | No       |               |
 | `contentType`           | The MIME content type of the messages written to RabbitMQ.          | No       | `text/plain`  |
+| `delivery.contentEncoding` | The content encoding for the message.                                       | No       |                |
+| `delivery.deliveryMode`    | Delivery mode of the message. Non-persistent (1) or persistent (2).        | No       | `2`            |
+| `elivery.priority`        | The priority of the message.                                               | No       | `0`            |
+| `delivery.correlationID`   | The correlation id associated with the message.                            | No       |                |
+| `delivery.replyTo`      | Address to reply to.                                                     | No       |                |
+| `delivery.messageTypeName`| The type name of the message.                                              | No       |                |
+| `delivery.userID`         | The user id associated with the message.                                    | No       |                |
+| `delivery.appID`          | The application id associated with the message.                             | No       |                |
+| `delivery.mandatory`      | Indicates if this message is mandatory.                                     | No       | `false`        |
+| `delivery.immediate`      | Indicates if this message should be treated as immediate.                   | No       | `false`        |
 | `exchange.name`         | The name of the exchange to publish to.                             | No       |               |
 | `exchange.type`         | The type of the exchange to publish to.                             | No       | `direct`      |
 | `exchange.durable`      | Specifies whether the exchange is durable.                          | No       | `true`        |
