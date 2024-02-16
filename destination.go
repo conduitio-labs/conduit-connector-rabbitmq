@@ -50,7 +50,7 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
-	d.exchange = d.config.ExchangeName
+	d.exchange = d.config.Exchange.Name
 	d.routingKey = d.config.RoutingKey
 	if d.exchange == "" {
 		d.routingKey = d.config.QueueName
@@ -83,24 +83,38 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	}
 	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
-	_, err = d.ch.QueueDeclare(d.config.QueueName, false, false, false, false, nil)
+	_, err = d.ch.QueueDeclare(
+		d.config.QueueName,
+		d.config.Queue.Durable,
+		d.config.Queue.AutoDelete,
+		d.config.Queue.Exclusive,
+		d.config.Queue.NoWait,
+		nil)
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
 	sdk.Logger(ctx).Debug().Msgf("declared queue %s", d.config.QueueName)
 
-	if d.config.ExchangeName != "" {
-		err = d.ch.ExchangeDeclare(d.config.ExchangeName, d.config.ExchangeType, false, false, false, false, nil)
+	if d.config.Exchange.Name != "" {
+		err = d.ch.ExchangeDeclare(
+			d.config.Exchange.Name,
+			d.config.Exchange.Type,
+			d.config.Exchange.Durable,
+			d.config.Exchange.AutoDelete,
+			d.config.Exchange.Internal,
+			d.config.Exchange.NoWait,
+			nil,
+		)
 		if err != nil {
 			return fmt.Errorf("failed to declare exchange: %w", err)
 		}
-		sdk.Logger(ctx).Debug().Msgf("declared exchange %s", d.config.ExchangeName)
+		sdk.Logger(ctx).Debug().Msgf("declared exchange %s", d.config.Exchange.Name)
 
-		err = d.ch.QueueBind(d.config.QueueName, d.config.RoutingKey, d.config.ExchangeName, false, nil)
+		err = d.ch.QueueBind(d.config.QueueName, d.config.RoutingKey, d.config.Exchange.Name, false, nil)
 		if err != nil {
 			return fmt.Errorf("failed to bind queue to exchange: %w", err)
 		}
-		sdk.Logger(ctx).Debug().Msgf("bound queue %s to exchange %s with routing key %s", d.config.QueueName, d.config.ExchangeName, d.config.RoutingKey)
+		sdk.Logger(ctx).Debug().Msgf("bound queue %s to exchange %s with routing key %s", d.config.QueueName, d.config.Exchange.Name, d.config.RoutingKey)
 	}
 
 	return nil

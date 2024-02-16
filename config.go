@@ -44,17 +44,40 @@ type SourceConfig struct {
 	Config
 }
 
+type QueueConfig struct {
+	// Durable indicates if the queue will survive broker restarts.
+	Durable bool `json:"durable" default:"true"`
+	// AutoDelete indicates if the queue will be deleted when there are no more consumers.
+	AutoDelete bool `json:"autoDelete" default:"false"`
+	// Exclusive indicates if the queue can be accessed by other connections.
+	Exclusive bool `json:"exclusive" default:"false"`
+	// NoWait indicates if the queue should be declared without waiting for server confirmation.
+	NoWait bool `json:"noWait" default:"false"`
+}
+
+type ExchangeConfig struct {
+	// Name is the name of the exchange.
+	Name string `json:"name"`
+	// Type is the type of the exchange (e.g., direct, fanout, topic, headers).
+	Type string `json:"type"`
+	// Durable indicates if the exchange will survive broker restarts.
+	Durable bool `json:"durable" default:"true"`
+	// AutoDelete indicates if the exchange will be deleted when the last queue is unbound from it.
+	AutoDelete bool `json:"autoDelete" default:"false"`
+	// Internal indicates if the exchange is used for internal purposes and cannot be directly published to by a client.
+	Internal bool `json:"internal" default:"false"`
+	// NoWait indicates if the exchange should be declared without waiting for server confirmation.
+	NoWait bool `json:"noWait" default:"false"`
+}
+
 type DestinationConfig struct {
 	Config
 
 	// ContentType is the MIME content type of the messages written to rabbitmq
 	ContentType string `json:"contentType" default:"text/plain"`
 
-	// ExchangeName is the name of the exchange to publish to
-	ExchangeName string `json:"exchangeName" default:""`
-
-	// ExchangeType is the type of the exchange to publish to
-	ExchangeType string `json:"exchangeType" default:"direct"`
+	Queue    QueueConfig    `json:"queue"`
+	Exchange ExchangeConfig `json:"exchange"`
 
 	// RoutingKey is the routing key to use when publishing to an exchange
 	RoutingKey string `json:"routingKey" default:""`

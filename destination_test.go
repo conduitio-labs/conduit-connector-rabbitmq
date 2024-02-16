@@ -51,10 +51,9 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 
 	dest := NewDestination()
 	destCfg := cfgToMap(DestinationConfig{
-		Config:       sharedCfg,
-		ExchangeName: exchangeName,
-		ExchangeType: exchangeType,
-		RoutingKey:   routingKey,
+		Config:     sharedCfg,
+		Exchange:   ExchangeConfig{Name: exchangeName, Type: exchangeType},
+		RoutingKey: routingKey,
 	})
 	err := dest.Configure(ctx, destCfg)
 	is.NoErr(err)

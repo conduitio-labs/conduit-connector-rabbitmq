@@ -33,16 +33,64 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
-		"exchangeName": {
+		"exchange.autoDelete": {
+			Default:     "false",
+			Description: "autoDelete indicates if the exchange will be deleted when the last queue is unbound from it.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"exchange.durable": {
+			Default:     "true",
+			Description: "durable indicates if the exchange will survive broker restarts.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"exchange.internal": {
+			Default:     "false",
+			Description: "internal indicates if the exchange is used for internal purposes and cannot be directly published to by a client.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"exchange.name": {
 			Default:     "",
-			Description: "exchangeName is the name of the exchange to publish to",
+			Description: "name is the name of the exchange.",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
-		"exchangeType": {
-			Default:     "direct",
-			Description: "exchangeType is the type of the exchange to publish to",
+		"exchange.noWait": {
+			Default:     "false",
+			Description: "noWait indicates if the exchange should be declared without waiting for server confirmation.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"exchange.type": {
+			Default:     "",
+			Description: "type is the type of the exchange (e.g., direct, fanout, topic, headers).",
 			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"queue.autoDelete": {
+			Default:     "false",
+			Description: "autoDelete indicates if the queue will be deleted when there are no more consumers.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"queue.durable": {
+			Default:     "true",
+			Description: "durable indicates if the queue will survive broker restarts.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"queue.exclusive": {
+			Default:     "false",
+			Description: "exclusive indicates if the queue can be accessed by other connections.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"queue.noWait": {
+			Default:     "false",
+			Description: "noWait indicates if the queue should be declared without waiting for server confirmation.",
+			Type:        sdk.ParameterTypeBool,
 			Validations: []sdk.Validation{},
 		},
 		"queueName": {
