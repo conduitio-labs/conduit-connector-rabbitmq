@@ -1,16 +1,20 @@
 # Conduit Connector for RabbitMQ
-Integration of [Conduit](https://conduit.io) with RabbitMQ.
+The RabbitMQ connector is one of [Conduit](https://github.com/ConduitIO/conduit) builtin plugins. It provides both, a
+source and a destination connector for [RabbitMQ](https://rabbitmq.com/).
 
 ## How to Build?
+
 Run `make build` to compile the connector.
 
 ## Testing
-Execute `make test` to perform all non-tls tests. Execute `make test-tls` for the tls tests.
 
-Use the Docker Compose file located at `test/docker-compose.yml` for running the required resources locally.
+Execute `make test` to perform all non-tls tests. Execute `make test-tls` for the tls tests. Both command use docker files located at `test/docker-compose.yml` and `test/docker-compose-tls.yml` respectively.
+Tests require docker compose v2.
 
 ## Source Connector
+
 The source connector extracts data from RabbitMQ and sends it to downstream systems via Conduit.
+
 
 ### Configuration Parameters
 
