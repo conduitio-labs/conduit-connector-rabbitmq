@@ -114,7 +114,10 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 		if err != nil {
 			return fmt.Errorf("failed to bind queue to exchange: %w", err)
 		}
-		sdk.Logger(ctx).Debug().Msgf("bound queue %s to exchange %s with routing key %s", d.config.QueueName, d.config.Exchange.Name, d.config.RoutingKey)
+		sdk.Logger(ctx).Debug().Msgf(
+			"bound queue %s to exchange %s with routing key %s",
+			d.config.QueueName, d.config.Exchange.Name, d.config.RoutingKey,
+		)
 	}
 
 	return nil

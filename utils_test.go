@@ -25,13 +25,6 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
-func init() {
-	// Uncomment this to set up a logger for tests to use. By default
-	// sdk.Logger log calls won't output anything
-	// log := log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
-	// zerolog.DefaultContextLogger = &log
-}
-
 // cfgToMap converts a config struct to a map. This is useful for more type
 // safety on tests.
 func cfgToMap(cfg any) map[string]string {

@@ -84,7 +84,10 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 		}
 
 		if s.config.QueueName != "" && s.config.QueueName != pos.QueueName {
-			return fmt.Errorf("the old position contains a different queue name than the connector configuration (%q vs %q), please check if the configured queue name changed since the last run", pos.QueueName, s.config.QueueName)
+			return fmt.Errorf(
+				"the old position contains a different queue name than the connector configuration (%q vs %q), please check if the configured queue name changed since the last run",
+				pos.QueueName, s.config.QueueName,
+			)
 		}
 
 		sdk.Logger(ctx).Debug().Msg("got queue name from given position")
