@@ -103,6 +103,9 @@ type DeliveryConfig struct {
 
 	// Immediate indicates if the message should be treated as immediate. If true, the message is not queued if no consumers are on the matching queue.
 	Immediate bool `json:"immediate" default:"false"`
+
+	// Expiration specifies the message expiration time, if any.
+	Expiration string `json:"expiration" default:""`
 }
 
 type DestinationConfig struct {

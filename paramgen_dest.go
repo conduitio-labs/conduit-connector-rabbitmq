@@ -57,6 +57,12 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 			Type:        sdk.ParameterTypeInt,
 			Validations: []sdk.Validation{},
 		},
+		"delivery.expiration": {
+			Default:     "",
+			Description: "expiration specifies the message expiration time, if any.",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
 		"delivery.immediate": {
 			Default:     "false",
 			Description: "immediate indicates if the message should be treated as immediate. If true, the message is not queued if no consumers are on the matching queue.",
