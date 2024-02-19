@@ -44,11 +44,11 @@ func TestSource_Integration_RestartFull(t *testing.T) {
 	})
 
 	recs1 := generateRabbitmqMsgs(1, 3)
-	go produceRabbitmqMsgs(ctx, is, queueName, recs1)
+	produceRabbitmqMsgs(ctx, is, queueName, recs1)
 	lastPosition := testSourceIntegrationRead(ctx, is, cfgMap, nil, recs1, false)
 
 	recs2 := generateRabbitmqMsgs(4, 6)
-	go produceRabbitmqMsgs(ctx, is, queueName, recs2)
+	produceRabbitmqMsgs(ctx, is, queueName, recs2)
 
 	testSourceIntegrationRead(ctx, is, cfgMap, lastPosition, recs2, false)
 }
