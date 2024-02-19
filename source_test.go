@@ -65,14 +65,14 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 	})
 
 	recs1 := generateRabbitmqMsgs(1, 3)
-	go produceRabbitmqMsgs(ctx, is, queueName, recs1)
+	produceRabbitmqMsgs(ctx, is, queueName, recs1)
 
 	lastPosition := testSourceIntegrationRead(ctx, is, cfgMap, nil, recs1, true)
 
 	// only first record was acked, produce more records and expect to resume
 	// from last acked record
 	recs2 := generateRabbitmqMsgs(4, 6)
-	go produceRabbitmqMsgs(ctx, is, queueName, recs2)
+	produceRabbitmqMsgs(ctx, is, queueName, recs2)
 
 	var wantRecs []amqp091.Publishing
 	wantRecs = append(wantRecs, recs1[1:]...)
