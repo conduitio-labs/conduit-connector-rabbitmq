@@ -25,9 +25,10 @@ import (
 )
 
 func TestAcceptance(t *testing.T) {
+
 	cfg := map[string]string{
-		"url":       testURL,
-		"queueName": "test-queue",
+		"url":        testURL,
+		"queue.name": "test-queue",
 	}
 	is := is.New(t)
 
@@ -59,27 +60,30 @@ func TestAcceptance_TLS(t *testing.T) {
 
 	is := is.New(t)
 
-	sharedCfg := Config{
+	cfg := Config{
 		URL:        testURLTLS,
-		QueueName:  "test-queue",
 		ClientCert: "./test/client.cert.pem",
 		ClientKey:  "./test/client.key.pem",
 		CACert:     "./test/ca.cert.pem",
 	}
-	cfg := cfgToMap(sharedCfg)
+
+	sourceCfg := SourceConfig{Config: cfg}.toMap()
+	destCfg := DestinationConfig{Config: cfg}.toMap()
+
 	ctx := context.Background()
 
-	tlsConfig, err := parseTLSConfig(ctx, sharedCfg)
+	tlsConfig, err := parseTLSConfig(ctx, cfg)
 	is.NoErr(err)
 
 	driver := sdk.ConfigurableAcceptanceTestDriver{
 		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
 			Connector:         Connector,
-			SourceConfig:      cfg,
-			DestinationConfig: cfg,
+			SourceConfig:      sourceCfg,
+			DestinationConfig: destCfg,
 			BeforeTest: func(t *testing.T) {
 				queueName := setupQueueNameTLS(t, is, tlsConfig)
-				cfg["queueName"] = queueName
+				sourceCfg["queueName"] = queueName
+				destCfg["queueName"] = queueName
 			},
 			Skip: []string{
 				"TestSource_Configure_RequiredParams",

@@ -17,50 +17,11 @@ package rabbitmq
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
-	"fmt"
 	"testing"
 
 	"github.com/matryer/is"
 	"github.com/rabbitmq/amqp091-go"
 )
-
-// cfgToMap converts a config struct to a map. This is useful for more type
-// safety on tests.
-func cfgToMap(cfg any) map[string]string {
-	bs, err := json.Marshal(cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	mAny := map[string]any{}
-	err = json.Unmarshal(bs, &mAny)
-	if err != nil {
-		panic(err)
-	}
-
-	m := map[string]string{}
-	for k, v := range mAny {
-		switch v := v.(type) {
-		case string:
-			m[k] = v
-		case bool:
-			m[k] = fmt.Sprintf("%t", v)
-		case float64:
-			// using %v to avoid scientific notation
-			m[k] = fmt.Sprintf("%v", v)
-		case map[string]any:
-			parsed := cfgToMap(v)
-			for k2, v := range parsed {
-				m[k+"."+k2] = v
-			}
-		default:
-			panic(fmt.Errorf("unsupported type used for cfgToMap func: %T", v))
-		}
-	}
-
-	return m
-}
 
 const (
 	testURL    = "amqp://guest:guest@localhost:5672"

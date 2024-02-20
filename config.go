@@ -15,6 +15,7 @@
 package rabbitmq
 
 import (
+	"encoding/json"
 	"fmt"
 
 	sdk "github.com/conduitio/conduit-connector-sdk"
@@ -41,6 +42,10 @@ type SourceConfig struct {
 	Config
 
 	Queue QueueConfig `json:"queue"`
+}
+
+func (cfg SourceConfig) toMap() map[string]string {
+	return cfgToMap(cfg)
 }
 
 type QueueConfig struct {
@@ -129,6 +134,10 @@ type DestinationConfig struct {
 	RoutingKey string `json:"routingKey" default:""`
 }
 
+func (cfg DestinationConfig) toMap() map[string]string {
+	return cfgToMap(cfg)
+}
+
 func newDestinationConfig(cfg map[string]string) (DestinationConfig, error) {
 	var destCfg DestinationConfig
 	err := sdk.Util.ParseConfig(cfg, &destCfg)
@@ -141,4 +150,41 @@ func newDestinationConfig(cfg map[string]string) (DestinationConfig, error) {
 	}
 
 	return destCfg, nil
+}
+
+// cfgToMap converts a config struct to a map. This is useful for more type
+// safety on tests.
+func cfgToMap(cfg any) map[string]string {
+	bs, err := json.Marshal(cfg)
+	if err != nil {
+		panic(err)
+	}
+
+	mAny := map[string]any{}
+	err = json.Unmarshal(bs, &mAny)
+	if err != nil {
+		panic(err)
+	}
+
+	m := map[string]string{}
+	for k, v := range mAny {
+		switch v := v.(type) {
+		case string:
+			m[k] = v
+		case bool:
+			m[k] = fmt.Sprintf("%t", v)
+		case float64:
+			// using %v to avoid scientific notation
+			m[k] = fmt.Sprintf("%v", v)
+		case map[string]any:
+			parsed := cfgToMap(v)
+			for k2, v := range parsed {
+				m[k+"."+k2] = v
+			}
+		default:
+			panic(fmt.Errorf("unsupported type used for cfgToMap func: %T", v))
+		}
+	}
+
+	return m
 }
