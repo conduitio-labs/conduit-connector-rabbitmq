@@ -39,18 +39,21 @@ func TestSource_Integration_RestartFull(t *testing.T) {
 	is := is.New(t)
 
 	queueName := setupQueueName(t, is)
-	cfgMap := cfgToMap(SourceConfig{
-		Config: Config{URL: testURL, QueueName: queueName},
-	})
+	sourceCfg := SourceConfig{
+		Config: Config{URL: testURL},
+		Queue: QueueConfig{
+			Name: queueName,
+		},
+	}
 
 	recs1 := generateRabbitmqMsgs(1, 3)
 	produceRabbitmqMsgs(ctx, is, queueName, recs1)
-	lastPosition := testSourceIntegrationRead(ctx, is, cfgMap, nil, recs1, false)
+	lastPosition := testSourceIntegrationRead(ctx, is, sourceCfg, nil, recs1, false)
 
 	recs2 := generateRabbitmqMsgs(4, 6)
 	produceRabbitmqMsgs(ctx, is, queueName, recs2)
 
-	testSourceIntegrationRead(ctx, is, cfgMap, lastPosition, recs2, false)
+	testSourceIntegrationRead(ctx, is, sourceCfg, lastPosition, recs2, false)
 }
 
 func TestSource_Integration_RestartPartial(t *testing.T) {
@@ -60,14 +63,17 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 	ctx := context.Background()
 	queueName := setupQueueName(t, is)
 
-	cfgMap := cfgToMap(SourceConfig{
-		Config: Config{URL: testURL, QueueName: queueName},
-	})
+	sourceCfg := SourceConfig{
+		Config: Config{URL: testURL},
+		Queue: QueueConfig{
+			Name: queueName,
+		},
+	}
 
 	recs1 := generateRabbitmqMsgs(1, 3)
 	produceRabbitmqMsgs(ctx, is, queueName, recs1)
 
-	lastPosition := testSourceIntegrationRead(ctx, is, cfgMap, nil, recs1, true)
+	lastPosition := testSourceIntegrationRead(ctx, is, sourceCfg, nil, recs1, true)
 
 	// only first record was acked, produce more records and expect to resume
 	// from last acked record
@@ -78,7 +84,7 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 	wantRecs = append(wantRecs, recs1[1:]...)
 	wantRecs = append(wantRecs, recs2...)
 
-	testSourceIntegrationRead(ctx, is, cfgMap, lastPosition, wantRecs, false)
+	testSourceIntegrationRead(ctx, is, sourceCfg, lastPosition, wantRecs, false)
 }
 
 const testAppID = "id-1234"
@@ -129,7 +135,7 @@ func produceRabbitmqMsgs(ctx context.Context, is *is.I, queueName string, msgs [
 func testSourceIntegrationRead(
 	ctx context.Context,
 	is *is.I,
-	cfgMap map[string]string,
+	cfg SourceConfig,
 	startFrom sdk.Position,
 	wantRecords []amqp091.Publishing,
 	ackFirstOnly bool,
@@ -140,7 +146,7 @@ func testSourceIntegrationRead(
 		is.NoErr(err)
 	}()
 
-	err := underTest.Configure(ctx, cfgMap)
+	err := underTest.Configure(ctx, cfg.toMap())
 	is.NoErr(err)
 	err = underTest.Open(ctx, startFrom)
 	is.NoErr(err)

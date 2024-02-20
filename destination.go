@@ -59,7 +59,7 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 	}
 
 	if d.config.RoutingKey == "" {
-		d.config.RoutingKey = d.config.QueueName
+		d.config.RoutingKey = d.config.Queue.Name
 	}
 
 	sdk.Logger(ctx).Debug().Msg("destination configured")
@@ -80,7 +80,7 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
 	_, err = d.ch.QueueDeclare(
-		d.config.QueueName,
+		d.config.Queue.Name,
 		d.config.Queue.Durable,
 		d.config.Queue.AutoDelete,
 		d.config.Queue.Exclusive,
@@ -89,7 +89,7 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Msgf("declared queue %s", d.config.QueueName)
+	sdk.Logger(ctx).Debug().Msgf("declared queue %s", d.config.Queue.Name)
 
 	if d.config.Exchange.Name != "" {
 		err = d.ch.ExchangeDeclare(
@@ -106,13 +106,13 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 		}
 		sdk.Logger(ctx).Debug().Msgf("declared exchange %s", d.config.Exchange.Name)
 
-		err = d.ch.QueueBind(d.config.QueueName, d.config.RoutingKey, d.config.Exchange.Name, false, nil)
+		err = d.ch.QueueBind(d.config.Queue.Name, d.config.RoutingKey, d.config.Exchange.Name, false, nil)
 		if err != nil {
 			return fmt.Errorf("failed to bind queue to exchange: %w", err)
 		}
 		sdk.Logger(ctx).Debug().Msgf(
 			"bound queue %s to exchange %s with routing key %s",
-			d.config.QueueName, d.config.Exchange.Name, d.config.RoutingKey,
+			d.config.Queue.Name, d.config.Exchange.Name, d.config.RoutingKey,
 		)
 	}
 
@@ -153,7 +153,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
 
-		sdk.Logger(ctx).Trace().Str("MessageID", msgID).Str("queue", d.config.QueueName).Msg("published message")
+		sdk.Logger(ctx).Trace().Str("MessageID", msgID).Str("queue", d.config.Queue.Name).Msg("published message")
 	}
 
 	return len(records), nil

@@ -47,7 +47,7 @@ func generate3Records(queueName string) []sdk.Record {
 
 func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey string) {
 	ctx := context.Background()
-	sharedCfg := Config{URL: testURL, QueueName: queueName}
+	sharedCfg := Config{URL: testURL}
 
 	dest := NewDestination()
 	destCfg := cfgToMap(DestinationConfig{
@@ -56,6 +56,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 			ContentType: "text/plain",
 		},
 		Queue: QueueConfig{
+			Name:       queueName,
 			Durable:    false,
 			AutoDelete: false,
 			Exclusive:  false,

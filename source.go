@@ -83,19 +83,19 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 			return fmt.Errorf("failed to parse position: %w", err)
 		}
 
-		if s.config.QueueName != "" && s.config.QueueName != pos.QueueName {
+		if s.config.Queue.Name != "" && s.config.Queue.Name != pos.QueueName {
 			return fmt.Errorf(
 				"the old position contains a different queue name than the connector configuration (%q vs %q), please check if the configured queue name changed since the last run",
-				pos.QueueName, s.config.QueueName,
+				pos.QueueName, s.config.Queue.Name,
 			)
 		}
 
 		sdk.Logger(ctx).Debug().Msg("got queue name from given position")
-		s.config.QueueName = pos.QueueName
+		s.config.Queue.Name = pos.QueueName
 	}
 
 	s.queue, err = s.ch.QueueDeclare(
-		s.config.QueueName,
+		s.config.Queue.Name,
 		s.config.Queue.Durable,
 		s.config.Queue.AutoDelete,
 		s.config.Queue.Exclusive,
