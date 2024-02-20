@@ -21,7 +21,11 @@ The source connector extracts data from RabbitMQ and sends it to downstream syst
 | Name                   | Description                                                  | Required | Default Value |
 |------------------------|--------------------------------------------------------------|----------|---------------|
 | `url`                  | The RabbitMQ server's URL.                                   | Yes      |               |
-| `queueName`            | The name of the RabbitMQ queue to consume messages from.     | Yes      |               |
+| `queue.name`           | The name of the RabbitMQ queue to consume messages from.     | Yes      |               |
+| `queue.durable`        | Specifies whether the queue is durable.                      | No       | `true`        |
+| `queue.autoDelete`     | If the queue will auto-delete.                               | No       | `false`       |
+| `queue.exclusive`      | If the queue is exclusive.                                   | No       | `false`       |
+| `queue.noWait`         | If the queue is declared without waiting for server reply.   | No       | `false`       |
 | `clientCert`           | Path to the client certificate for TLS.                      | No       |               |
 | `clientKey`            | Path to the client's key for TLS.                            | No       |               |
 | `caCert`               | Path to the CA (Certificate Authority) certificate for TLS.  | No       |               |
@@ -35,7 +39,11 @@ The destination connector sends data from upstream systems to RabbitMQ via Condu
 | Name                       | Description                                                         | Required | Default Value |
 |----------------------------|---------------------------------------------------------------------|----------|---------------|
 | `url`                      | The RabbitMQ server's URL.                                          | Yes      |               |
-| `queueName`                | The name of the RabbitMQ queue where messages will be published to. | Yes      |               |
+| `queue.name`               | The name of the RabbitMQ queue where messages will be published to. | Yes      |               |
+| `queue.durable`            | Specifies whether the queue is durable.                             | No       | `true`        |
+| `queue.autoDelete`         | If the queue will auto-delete.                                      | No       | `false`       |
+| `queue.exclusive`          | If the queue is exclusive.                                          | No       | `false`       |
+| `queue.noWait`             | If the queue is declared without waiting for server reply.          | No       | `false`       |
 | `clientCert`               | Path to the client certificate for TLS.                             | No       |               |
 | `clientKey`                | Path to the client's key for TLS.                                   | No       |               |
 | `caCert`                   | Path to the CA (Certificate Authority) certificate for TLS.         | No       |               |
@@ -57,8 +65,4 @@ The destination connector sends data from upstream systems to RabbitMQ via Condu
 | `exchange.autoDelete`      | If the exchange will auto-delete.                                   | No       | `false`       |
 | `exchange.internal`        | If the exchange is internal.                                        | No       | `false`       |
 | `exchange.noWait`          | If the exchange is declared without waiting for server reply.       | No       | `false`       |
-| `queue.durable`            | Specifies whether the queue is durable.                             | No       | `true`        |
-| `queue.autoDelete`         | If the queue will auto-delete.                                      | No       | `false`       |
-| `queue.exclusive`          | If the queue is exclusive.                                          | No       | `false`       |
-| `queue.noWait`             | If the queue is declared without waiting for server reply.          | No       | `false`       |
 | `routingKey`               | The routing key to use when publishing to an exchange.              | No       |               |
