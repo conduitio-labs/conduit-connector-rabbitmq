@@ -39,7 +39,7 @@ func TestAcceptance(t *testing.T) {
 			DestinationConfig: cfg,
 			BeforeTest: func(t *testing.T) {
 				queueName := setupQueueName(t, is)
-				cfg["queueName"] = queueName
+				cfg["queue.name"] = queueName
 			},
 			Skip: []string{
 				"TestSource_Configure_RequiredParams",
@@ -82,8 +82,8 @@ func TestAcceptance_TLS(t *testing.T) {
 			DestinationConfig: destCfg,
 			BeforeTest: func(t *testing.T) {
 				queueName := setupQueueNameTLS(t, is, tlsConfig)
-				sourceCfg["queueName"] = queueName
-				destCfg["queueName"] = queueName
+				sourceCfg["queue.name"] = queueName
+				destCfg["queue.name"] = queueName
 			},
 			Skip: []string{
 				"TestSource_Configure_RequiredParams",

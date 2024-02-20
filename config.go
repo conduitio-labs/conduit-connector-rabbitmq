@@ -50,7 +50,7 @@ func (cfg SourceConfig) toMap() map[string]string {
 
 type QueueConfig struct {
 	// Name is the name of the queue to consume from / publish to
-	Name string `json:"queueName" validate:"required"`
+	Name string `json:"name" validate:"required"`
 
 	// Durable indicates if the queue will survive broker restarts.
 	Durable bool `json:"durable" default:"true"`
