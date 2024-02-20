@@ -124,7 +124,7 @@ func produceRabbitmqMsgs(ctx context.Context, is *is.I, queueName string, msgs [
 }
 
 // testSourceIntegrationRead reads and acks messages in range [from,to].
-// If ackFirst is true, only the first message will be acknowledged.
+// If ackFirstOnly is true, only the first message will be acknowledged.
 // Returns the position of the last message read.
 func testSourceIntegrationRead(
 	ctx context.Context,
