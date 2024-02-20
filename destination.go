@@ -140,8 +140,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			AppId:     d.config.Delivery.AppID,
 			Body:      record.Bytes(),
 
-			// TODO: study this field, I'm not sure what's supposed to do
-			Expiration: "",
+			Expiration: d.config.Delivery.Expiration,
 		}
 
 		if createdAt, err := record.Metadata.GetCreatedAt(); err != nil {
