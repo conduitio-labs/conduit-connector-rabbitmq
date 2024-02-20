@@ -32,8 +32,6 @@ type Destination struct {
 
 	config    DestinationConfig
 	tlsConfig *tls.Config
-
-	exchange, routingKey string
 }
 
 func NewDestination() sdk.Destination {
@@ -50,12 +48,6 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
-	d.exchange = d.config.Exchange.Name
-	d.routingKey = d.config.RoutingKey
-	if d.exchange == "" {
-		d.routingKey = d.config.QueueName
-	}
-
 	if shouldParseTLSConfig(ctx, d.config.Config) {
 		d.tlsConfig, err = parseTLSConfig(ctx, d.config.Config)
 		if err != nil {
@@ -64,6 +56,10 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 
 		sdk.Logger(ctx).Debug().Msg("source configured with TLS")
 		return nil
+	}
+
+	if d.config.RoutingKey == "" {
+		d.config.RoutingKey = d.config.QueueName
 	}
 
 	sdk.Logger(ctx).Debug().Msg("destination configured")
@@ -148,7 +144,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 		}
 
 		err := d.ch.PublishWithContext(
-			ctx, d.exchange, d.routingKey,
+			ctx, d.config.Exchange.Name, d.config.RoutingKey,
 			d.config.Delivery.Mandatory,
 			d.config.Delivery.Immediate,
 			msg,

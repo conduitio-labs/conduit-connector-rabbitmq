@@ -94,7 +94,13 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 		s.config.QueueName = pos.QueueName
 	}
 
-	s.queue, err = s.ch.QueueDeclare(s.config.QueueName, false, false, false, false, nil)
+	s.queue, err = s.ch.QueueDeclare(
+		s.config.QueueName,
+		s.config.Queue.Durable,
+		s.config.Queue.AutoDelete,
+		s.config.Queue.Exclusive,
+		s.config.Queue.NoWait,
+		nil)
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}

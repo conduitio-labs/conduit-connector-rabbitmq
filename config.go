@@ -27,9 +27,6 @@ type Config struct {
 	// URL is the RabbitMQ server URL
 	URL string `json:"url" validate:"required"`
 
-	// QueueName is the name of the queue to consume from / publish to
-	QueueName string `json:"queueName" validate:"required"`
-
 	// ClientCert is the path to the client certificate to use for TLS
 	ClientCert string `json:"clientCert"`
 
@@ -42,15 +39,23 @@ type Config struct {
 
 type SourceConfig struct {
 	Config
+
+	Queue QueueConfig `json:"queue"`
 }
 
 type QueueConfig struct {
+	// Name is the name of the queue to consume from / publish to
+	Name string `json:"queueName" validate:"required"`
+
 	// Durable indicates if the queue will survive broker restarts.
 	Durable bool `json:"durable" default:"true"`
+
 	// AutoDelete indicates if the queue will be deleted when there are no more consumers.
 	AutoDelete bool `json:"autoDelete" default:"false"`
+
 	// Exclusive indicates if the queue can be accessed by other connections.
 	Exclusive bool `json:"exclusive" default:"false"`
+
 	// NoWait indicates if the queue should be declared without waiting for server confirmation.
 	NoWait bool `json:"noWait" default:"false"`
 }
@@ -58,14 +63,19 @@ type QueueConfig struct {
 type ExchangeConfig struct {
 	// Name is the name of the exchange.
 	Name string `json:"name"`
+
 	// Type is the type of the exchange (e.g., direct, fanout, topic, headers).
 	Type string `json:"type"`
+
 	// Durable indicates if the exchange will survive broker restarts.
 	Durable bool `json:"durable" default:"true"`
+
 	// AutoDelete indicates if the exchange will be deleted when the last queue is unbound from it.
 	AutoDelete bool `json:"autoDelete" default:"false"`
+
 	// Internal indicates if the exchange is used for internal purposes and cannot be directly published to by a client.
 	Internal bool `json:"internal" default:"false"`
+
 	// NoWait indicates if the exchange should be declared without waiting for server confirmation.
 	NoWait bool `json:"noWait" default:"false"`
 }
@@ -111,8 +121,8 @@ type DeliveryConfig struct {
 type DestinationConfig struct {
 	Config
 
-	Delivery DeliveryConfig `json:"delivery"`
 	Queue    QueueConfig    `json:"queue"`
+	Delivery DeliveryConfig `json:"delivery"`
 	Exchange ExchangeConfig `json:"exchange"`
 
 	// RoutingKey is the routing key to use when publishing to an exchange
