@@ -50,7 +50,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 	sharedCfg := Config{URL: testURL}
 
 	dest := NewDestination()
-	destCfg := cfgToMap(DestinationConfig{
+	destCfg := DestinationConfig{
 		Config: sharedCfg,
 		Delivery: DeliveryConfig{
 			ContentType: "text/plain",
@@ -71,7 +71,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 			NoWait:     false,
 		},
 		RoutingKey: routingKey,
-	})
+	}.toMap()
 	err := dest.Configure(ctx, destCfg)
 	is.NoErr(err)
 
@@ -84,7 +84,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 	is.NoErr(err)
 
 	src := NewSource().(*Source)
-	srcCfg := cfgToMap(SourceConfig{Config: sharedCfg})
+	srcCfg := SourceConfig{Config: sharedCfg}.toMap()
 	err = src.Configure(ctx, srcCfg)
 	is.NoErr(err)
 
