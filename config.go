@@ -76,7 +76,7 @@ type ConsumerConfig struct {
 type SourceConfig struct {
 	Config
 
-	Queue QueueConfig `json:"queue"`
+	Queue    QueueConfig    `json:"queue"`
 	Consumer ConsumerConfig `json:"consumer"`
 }
 

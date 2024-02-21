@@ -25,7 +25,6 @@ import (
 )
 
 func TestAcceptance(t *testing.T) {
-
 	cfg := map[string]string{
 		"url":        testURL,
 		"queue.name": "test-queue",

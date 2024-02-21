@@ -27,8 +27,10 @@ import (
 )
 
 type Position struct {
-	DeliveryTag uint64
-	QueueName   string
+	DeliveryTag  uint64 `json:"deliveryTag"`
+	QueueName    string `json:"queueName"`
+	ExchangeName string `json:"exchangeName"`
+	RoutingKey   string `json:"routingKey"`
 }
 
 func (p Position) ToSdkPosition() sdk.Position {
