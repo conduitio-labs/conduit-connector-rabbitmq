@@ -38,16 +38,6 @@ type Config struct {
 	CACert string `json:"caCert"`
 }
 
-type SourceConfig struct {
-	Config
-
-	Queue QueueConfig `json:"queue"`
-}
-
-func (cfg SourceConfig) toMap() map[string]string {
-	return cfgToMap(cfg)
-}
-
 type QueueConfig struct {
 	// Name is the name of the queue to consume from / publish to
 	Name string `json:"name" validate:"required"`
@@ -63,6 +53,35 @@ type QueueConfig struct {
 
 	// NoWait indicates if the queue should be declared without waiting for server confirmation.
 	NoWait bool `json:"noWait" default:"false"`
+}
+
+// to use with ampq.Channel Consume method
+type ConsumerConfig struct {
+	// Name is the name of the consumer
+	Name string `json:"name"`
+
+	// AutoAck indicates if the server should consider messages acknowledged once delivered.
+	AutoAck bool `json:"autoAck" default:"false"`
+
+	// Exclusive indicates if the consumer should be exclusive.
+	Exclusive bool `json:"exclusive" default:"false"`
+
+	// NoLocal indicates if the server should not deliver messages published by the same connection.
+	NoLocal bool `json:"noLocal" default:"false"`
+
+	// NoWait indicates if the consumer should be declared without waiting for server confirmation.
+	NoWait bool `json:"noWait" default:"false"`
+}
+
+type SourceConfig struct {
+	Config
+
+	Queue QueueConfig `json:"queue"`
+	Consumer ConsumerConfig `json:"consumer"`
+}
+
+func (cfg SourceConfig) toMap() map[string]string {
+	return cfgToMap(cfg)
 }
 
 type ExchangeConfig struct {

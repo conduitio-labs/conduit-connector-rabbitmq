@@ -18,17 +18,22 @@ The source connector extracts data from RabbitMQ and sends it to downstream syst
 
 ### Configuration Parameters
 
-| Name                   | Description                                                  | Required | Default Value |
-|------------------------|--------------------------------------------------------------|----------|---------------|
-| `url`                  | The RabbitMQ server's URL.                                   | Yes      |               |
-| `queue.name`           | The name of the RabbitMQ queue to consume messages from.     | Yes      |               |
-| `queue.durable`        | Specifies whether the queue is durable.                      | No       | `true`        |
-| `queue.autoDelete`     | If the queue will auto-delete.                               | No       | `false`       |
-| `queue.exclusive`      | If the queue is exclusive.                                   | No       | `false`       |
-| `queue.noWait`         | If the queue is declared without waiting for server reply.   | No       | `false`       |
-| `clientCert`           | Path to the client certificate for TLS.                      | No       |               |
-| `clientKey`            | Path to the client's key for TLS.                            | No       |               |
-| `caCert`               | Path to the CA (Certificate Authority) certificate for TLS.  | No       |               |
+| Name                   | Description                                                                 | Required | Default Value |
+|------------------------|-----------------------------------------------------------------------------|----------|---------------|
+| `url`                  | The RabbitMQ server's URL.                                                  | Yes      |               |
+| `queue.name`           | The name of the RabbitMQ queue to consume messages from.                    | Yes      |               |
+| `queue.durable`        | Specifies whether the queue is durable.                                     | No       | `true`        |
+| `queue.autoDelete`     | If the queue will auto-delete.                                              | No       | `false`       |
+| `queue.exclusive`      | If the queue is exclusive.                                                  | No       | `false`       |
+| `queue.noWait`         | If the queue is declared without waiting for server reply.                  | No       | `false`       |
+| `consumer.name`        | The name of the consumer.                                                   | No       |               |
+| `consumer.autoAck`     | If the server should consider messages acknowledged once delivered.         | No       | `false`       |
+| `consumer.exclusive`   | If the consumer should be exclusive.                                        | No       | `false`       |
+| `consumer.noLocal`     | If the server should not deliver messages published by the same connection. | No       | `false`       |
+| `consumer.noWait`      | If the consumer should be declared without waiting for server confirmation. | No       | `false`       |
+| `clientCert`           | Path to the client certificate for TLS.                                     | No       |               |
+| `clientKey`            | Path to the client's key for TLS.                                           | No       |               |
+| `caCert`               | Path to the CA (Certificate Authority) certificate for TLS.                 | No       |               |
 
 
 ## Destination Connector

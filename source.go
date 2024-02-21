@@ -106,7 +106,14 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 	}
 	sdk.Logger(ctx).Debug().Msgf("declared queue %s", s.queue.Name)
 
-	s.msgs, err = s.ch.Consume(s.queue.Name, "", false, false, false, false, nil)
+	s.msgs, err = s.ch.Consume(
+		s.queue.Name,
+		s.config.Consumer.Name,
+		s.config.Consumer.AutoAck,
+		s.config.Consumer.Exclusive,
+		s.config.Consumer.NoLocal,
+		s.config.Consumer.NoWait,
+		nil)
 	if err != nil {
 		return fmt.Errorf("failed to consume: %w", err)
 	}
