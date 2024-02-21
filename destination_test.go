@@ -32,8 +32,12 @@ func generate3Records(queueName string) []sdk.Record {
 	for i := 0; i < 3; i++ {
 		exampleMessage := fmt.Sprintf("example message %d", i)
 
+		// We are not using the sdk.Position for resuming from a position, so
+		// we can just use a random unique UUID
+		position := []byte(uuid.NewString())
+
 		rec := sdk.Util.Source.NewRecordCreate(
-			[]byte(uuid.NewString()),
+			position,
 			sdk.Metadata{"rabbitmq.queue": queueName},
 			sdk.RawData("test-key"),
 			sdk.RawData(exampleMessage),
@@ -49,29 +53,24 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 	ctx := context.Background()
 	sharedCfg := Config{URL: testURL}
 
-	dest := NewDestination()
+	srcCfg := SourceConfig{
+		Config: sharedCfg,
+		Queue:  QueueConfig{Name: queueName},
+	}.toMap()
 	destCfg := DestinationConfig{
 		Config: sharedCfg,
 		Delivery: DeliveryConfig{
 			ContentType: "text/plain",
 		},
-		Queue: QueueConfig{
-			Name:       queueName,
-			Durable:    false,
-			AutoDelete: false,
-			Exclusive:  false,
-			NoWait:     false,
-		},
+		Queue: QueueConfig{Name: queueName},
 		Exchange: ExchangeConfig{
-			Name:       exchangeName,
-			Type:       exchangeType,
-			Durable:    false,
-			AutoDelete: false,
-			Internal:   false,
-			NoWait:     false,
+			Name: exchangeName,
+			Type: exchangeType,
 		},
 		RoutingKey: routingKey,
 	}.toMap()
+
+	dest := NewDestination()
 	err := dest.Configure(ctx, destCfg)
 	is.NoErr(err)
 
@@ -84,7 +83,6 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 	is.NoErr(err)
 
 	src := NewSource().(*Source)
-	srcCfg := SourceConfig{Config: sharedCfg}.toMap()
 	err = src.Configure(ctx, srcCfg)
 	is.NoErr(err)
 
