@@ -104,7 +104,7 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to declare queue: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Msgf("declared queue %s", s.queue.Name)
+	sdk.Logger(ctx).Debug().Str("queueName", s.queue.Name).Msg("declared queue")
 
 	s.msgs, err = s.ch.Consume(
 		s.queue.Name,
@@ -117,7 +117,7 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 	if err != nil {
 		return fmt.Errorf("failed to consume: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Msgf("subscribed to queue %s", s.queue.Name)
+	sdk.Logger(ctx).Debug().Str("queueName", s.queue.Name).Msg("subscribed to queue")
 
 	return nil
 }
