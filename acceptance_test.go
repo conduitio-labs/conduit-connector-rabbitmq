@@ -83,6 +83,9 @@ func TestAcceptance_TLS(t *testing.T) {
 				queueName := setupQueueNameTLS(t, is, tlsConfig)
 				sourceCfg["queue.name"] = queueName
 				destCfg["queue.name"] = queueName
+				// TODO: I can see why this is necessary, but then, why does
+				// the previous acceptance test not need it?
+				destCfg["routingKey"] = queueName
 			},
 			Skip: []string{
 				"TestSource_Configure_RequiredParams",
