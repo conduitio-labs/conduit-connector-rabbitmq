@@ -8,7 +8,7 @@ Run `make build` to compile the connector.
 
 ## Testing
 
-Execute `make test` to perform all non-tls tests. Execute `make test-tls` for the tls tests. Both command use docker files located at `test/docker-compose.yml` and `test/docker-compose-tls.yml` respectively.
+Execute `make test` to perform all non-tls tests. Execute `make test-tls` for the TLS tests. Both commands use docker files located at `test/docker-compose.yml` and `test/docker-compose-tls.yml` respectively.
 Tests require docker compose v2.
 
 ## Source Connector
