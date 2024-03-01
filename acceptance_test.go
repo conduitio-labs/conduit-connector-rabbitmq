@@ -16,7 +16,6 @@ package rabbitmq
 
 import (
 	"context"
-	"os"
 	"testing"
 	"time"
 
@@ -53,17 +52,13 @@ func TestAcceptance(t *testing.T) {
 }
 
 func TestAcceptance_TLS(t *testing.T) {
-	if os.Getenv("RABBITMQ_TLS") != "true" {
-		t.Skip()
-	}
-
 	is := is.New(t)
 
 	cfg := Config{
 		URL:        testURLTLS,
-		ClientCert: "./test/client.cert.pem",
-		ClientKey:  "./test/client.key.pem",
-		CACert:     "./test/ca.cert.pem",
+		ClientCert: "./test/certs/client.cert.pem",
+		ClientKey:  "./test/certs/client.key.pem",
+		CACert:     "./test/certs/ca.cert.pem",
 	}
 
 	sourceCfg := SourceConfig{Config: cfg}.toMap()

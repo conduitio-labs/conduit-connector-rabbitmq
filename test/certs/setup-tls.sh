@@ -1,6 +1,5 @@
 #!/bin/bash
 
-# Step 1: Generate CA Key
 openssl genrsa -out ca.key.pem 2048
 
 openssl req -x509 -new -nodes -key ca.key.pem -subj "/CN=CARoot" -days 3650 -out ca.cert.pem

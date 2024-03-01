@@ -7,18 +7,8 @@ build:
 
 test:
 	docker compose -f test/docker-compose.yml up --quiet-pull -d --wait 
-	go test $(GOTEST_FLAGS) -v -race .; ret=$$?; \
+	go test -count=1 -v -race .; ret=$$?; \
 		docker compose -f test/docker-compose.yml down; \
-		exit $$ret
-
-test-tls:
-	rm -rf test/*.pem
-	cd test && ./setup-tls.sh
-	docker compose -f test/docker-compose-tls.yml up --quiet-pull -d --wait 
-	export RABBITMQ_TLS=true && \
-	go test -v -count=1 -run TLS -race .; ret=$$?; \
-		docker compose -f test/docker-compose-tls.yml down && \
-		rm -rf test/*.pem && \
 		exit $$ret
 
 generate:
@@ -39,10 +29,3 @@ up:
 down:
 	docker compose -f test/docker-compose.yml down -v --remove-orphans
 
-up-tls:
-	rm -rf test/*.pem
-	cd test && ./setup-tls.sh
-	docker compose -f test/docker-compose-tls.yml up --quiet-pull -d --wait 
-
-down-tls:
-	docker compose -f test/docker-compose-tls.yml down -v --remove-orphans

@@ -16,8 +16,5 @@ jobs:
         with:
           go-version-file: 'go.mod'
 
-      - name: Integration test with rabbitmq
+      - name: Integration tests with rabbitmq
         run: make test
-
-      - name: TLS Integration test with rabbitmq
-        run: make test-tls

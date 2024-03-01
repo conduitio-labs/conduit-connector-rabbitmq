@@ -13,3 +13,20 @@ services:
       timeout: 20s
       retries: 6
       start_period: 30s
+
+  rabbitmq-tls:
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq-tls
+    ports:
+      - "5671:5671"
+
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 5s
+      timeout: 20s
+      retries: 6
+      start_period: 30s
+    volumes:
+      - ./certs:/etc/rabbitmq
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+
