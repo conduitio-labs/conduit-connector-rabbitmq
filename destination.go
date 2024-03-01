@@ -16,7 +16,6 @@ package rabbitmq
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 
@@ -30,8 +29,7 @@ type Destination struct {
 	conn *amqp091.Connection
 	ch   *amqp091.Channel
 
-	config    DestinationConfig
-	tlsConfig *tls.Config
+	config DestinationConfig
 }
 
 func NewDestination() sdk.Destination {
@@ -48,16 +46,6 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
-	if shouldParseTLSConfig(ctx, d.config.Config) {
-		d.tlsConfig, err = parseTLSConfig(ctx, d.config.Config)
-		if err != nil {
-			return fmt.Errorf("failed to parse TLS config: %w", err)
-		}
-
-		sdk.Logger(ctx).Debug().Msg("source configured with TLS")
-		return nil
-	}
-
 	if d.config.RoutingKey == "" {
 		d.config.RoutingKey = d.config.Queue.Name
 	}
@@ -67,7 +55,7 @@ func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err
 }
 
 func (d *Destination) Open(ctx context.Context) (err error) {
-	d.conn, err = ampqDial(d.config.URL, d.tlsConfig)
+	d.conn, err = ampqDial(ctx, d.config.Config)
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
 	}

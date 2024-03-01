@@ -50,22 +50,12 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 		return fmt.Errorf("invalid config: %w", err)
 	}
 
-	if shouldParseTLSConfig(ctx, s.config.Config) {
-		s.tlsConfig, err = parseTLSConfig(ctx, s.config.Config)
-		if err != nil {
-			return fmt.Errorf("failed to parse TLS config: %w", err)
-		}
-
-		sdk.Logger(ctx).Debug().Msg("source configured with TLS")
-		return nil
-	}
-
 	sdk.Logger(ctx).Debug().Msg("source configured")
 	return nil
 }
 
 func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
-	s.conn, err = ampqDial(s.config.URL, s.tlsConfig)
+	s.conn, err = ampqDial(ctx, s.config.Config)
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
 	}

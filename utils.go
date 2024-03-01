@@ -87,26 +87,15 @@ func metadataFromMessage(msg amqp091.Delivery) sdk.Metadata {
 	return metadata
 }
 
-func shouldParseTLSConfig(ctx context.Context, cfg Config) bool {
-	areAllSet := cfg.ClientCert != "" && cfg.ClientKey != "" && cfg.CACert != ""
-	someAreSet := cfg.ClientCert != "" || cfg.ClientKey != "" || cfg.CACert != ""
-
-	if someAreSet && !areAllSet {
-		sdk.Logger(ctx).Error().Msg("some TLS config is set, but not all; ignoring TLS config")
-	}
-
-	return areAllSet
-}
-
-func parseTLSConfig(ctx context.Context, cfg Config) (*tls.Config, error) {
-	cert, err := tls.LoadX509KeyPair(cfg.ClientCert, cfg.ClientKey)
+func parseTLSConfig(ctx context.Context, config Config) (*tls.Config, error) {
+	cert, err := tls.LoadX509KeyPair(config.TLS.ClientCert, config.TLS.ClientKey)
 	if err != nil {
 		return nil, fmt.Errorf("error loading client cert: %w", err)
 	}
 
 	sdk.Logger(ctx).Debug().Msg("loaded client cert and key")
 
-	caCert, err := os.ReadFile(cfg.CACert)
+	caCert, err := os.ReadFile(config.TLS.CACert)
 	if err != nil {
 		return nil, fmt.Errorf("error loading CA cert: %w", err)
 	}
@@ -129,14 +118,19 @@ func parseTLSConfig(ctx context.Context, cfg Config) (*tls.Config, error) {
 	if version == "(devel)" {
 		tlsConfig.InsecureSkipVerify = true
 	}
-
+	
 	return tlsConfig, nil
 }
 
-func ampqDial(url string, tlsConfig *tls.Config) (*amqp091.Connection, error) {
-	if tlsConfig != nil {
-		return amqp091.DialTLS(url, tlsConfig)
+func ampqDial(ctx context.Context, config Config) (*amqp091.Connection, error) {
+	if !config.TLS.Enabled {
+		return amqp091.Dial(config.URL)
 	}
 
-	return amqp091.Dial(url)
+	tlsConfig, err := parseTLSConfig(ctx, config)
+	if err != nil {
+		return nil, fmt.Errorf("error parsing TLS config: %w", err)
+	}
+
+	return amqp091.DialTLS(config.URL, tlsConfig)
 }

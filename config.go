@@ -28,6 +28,13 @@ type Config struct {
 	// URL is the RabbitMQ server URL
 	URL string `json:"url" validate:"required"`
 
+	TLS TLSConfig `json:"tls"`
+}
+
+type TLSConfig struct {
+	// Enabled indicates if TLS should be used
+	Enabled bool `json:"enabled" default:"false"`
+
 	// ClientCert is the path to the client certificate to use for TLS
 	ClientCert string `json:"clientCert"`
 

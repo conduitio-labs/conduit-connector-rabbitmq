@@ -55,10 +55,13 @@ func TestAcceptance_TLS(t *testing.T) {
 	is := is.New(t)
 
 	cfg := Config{
-		URL:        testURLTLS,
-		ClientCert: "./test/certs/client.cert.pem",
-		ClientKey:  "./test/certs/client.key.pem",
-		CACert:     "./test/certs/ca.cert.pem",
+		URL: testURLTLS,
+		TLS: TLSConfig{
+			Enabled:    true,
+			ClientCert: "./test/certs/client.cert.pem",
+			ClientKey:  "./test/certs/client.key.pem",
+			CACert:     "./test/certs/ca.cert.pem",
+		},
 	}
 
 	sourceCfg := SourceConfig{Config: cfg}.toMap()
