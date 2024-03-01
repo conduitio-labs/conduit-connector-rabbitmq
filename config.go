@@ -119,10 +119,10 @@ type DeliveryConfig struct {
 	ContentType string `json:"contentType" default:"text/plain"`
 
 	// DeliveryMode indicates the message delivery mode. Non-persistent (1) or persistent (2). Default is 2 (persistent).
-	DeliveryMode uint8 `json:"deliveryMode" default:"2"`
+	DeliveryMode uint8 `json:"deliveryMode" default:"2" validation:"inclusion=1|2"`
 
 	// Priority specifies the message priority. Ranges from 0 to 9. Default is 0.
-	Priority uint8 `json:"priority" default:"0"`
+	Priority uint8 `json:"priority" default:"0" validate:"greater-than=-1,less-than=10"`
 
 	// CorrelationID is used to correlate RPC responses with requests.
 	CorrelationID string `json:"correlationID" default:""`
