@@ -118,7 +118,7 @@ func parseTLSConfig(ctx context.Context, config Config) (*tls.Config, error) {
 	if version == "(devel)" {
 		tlsConfig.InsecureSkipVerify = true
 	}
-	
+
 	return tlsConfig, nil
 }
 

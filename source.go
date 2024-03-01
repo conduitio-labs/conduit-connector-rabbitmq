@@ -16,7 +16,6 @@ package rabbitmq
 
 import (
 	"context"
-	"crypto/tls"
 	"errors"
 	"fmt"
 
@@ -32,8 +31,7 @@ type Source struct {
 	queue amqp091.Queue
 	msgs  <-chan amqp091.Delivery
 
-	config    SourceConfig
-	tlsConfig *tls.Config
+	config SourceConfig
 }
 
 func NewSource() sdk.Source {
