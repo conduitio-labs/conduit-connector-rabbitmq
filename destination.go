@@ -120,7 +120,7 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 }
 
 func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
-	for _, record := range records {
+	for i, record := range records {
 		msgID := string(record.Position)
 		msg := amqp091.Publishing{
 			ContentType:     d.config.Delivery.ContentType,
@@ -152,7 +152,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 			msg,
 		)
 		if err != nil {
-			return 0, fmt.Errorf("failed to publish: %w", err)
+			return i, fmt.Errorf("failed to publish: %w", err)
 		}
 
 		sdk.Logger(ctx).Trace().
