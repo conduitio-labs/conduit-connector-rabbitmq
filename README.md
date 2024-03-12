@@ -9,18 +9,27 @@ Run `make build` to compile the connector.
 ## Testing
 
 Execute `make test` to perform all non-tls tests. Execute `make test-tls` for the TLS tests. Both commands use docker files located at `test/docker-compose.yml` and `test/docker-compose-tls.yml` respectively.
-Tests require docker compose v2.
+Tests require docker-compose v2.
+
+## Shared Configuration Parameters
+
+Shared between source and destination connectors.
+
+| Name             | Description                                         | Required | Default Value |
+|------------------|-----------------------------------------------------|----------|---------------|
+| `url`            | The RabbitMQ server's URL.                          | Yes      |               |
+| `tls.clientCert` | Path to the client certificate for TLS.             | No       |               |
+| `tls.clientKey`  | Path to the client's key for TLS.                   | No       |               |
+| `tls.caCert`     | Path to the CA (Certificate Authority) certificate for TLS. | No   |               |
 
 ## Source Connector
 
 The source connector extracts data from RabbitMQ and sends it to downstream systems via Conduit.
 
-
-### Configuration Parameters
+### Source Configuration Parameters
 
 | Name                   | Description                                                                 | Required | Default Value |
 |------------------------|-----------------------------------------------------------------------------|----------|---------------|
-| `url`                  | The RabbitMQ server's URL.                                                  | Yes      |               |
 | `queue.name`           | The name of the RabbitMQ queue to consume messages from.                    | Yes      |               |
 | `queue.durable`        | Specifies whether the queue is durable.                                     | No       | `true`        |
 | `queue.autoDelete`     | If the queue will auto-delete.                                              | No       | `false`       |
@@ -31,27 +40,20 @@ The source connector extracts data from RabbitMQ and sends it to downstream syst
 | `consumer.exclusive`   | If the consumer should be exclusive.                                        | No       | `false`       |
 | `consumer.noLocal`     | If the server should not deliver messages published by the same connection. | No       | `false`       |
 | `consumer.noWait`      | If the consumer should be declared without waiting for server confirmation. | No       | `false`       |
-| `tls.clientCert`           | Path to the client certificate for TLS.                                     | No       |               |
-| `tls.clientKey`            | Path to the client's key for TLS.                                           | No       |               |
-| `tls.caCert`               | Path to the CA (Certificate Authority) certificate for TLS.                 | No       |               |
-
 
 ## Destination Connector
+
 The destination connector sends data from upstream systems to RabbitMQ via Conduit.
 
-### Configuration Parameters
+### Destination Configuration Parameters
 
 | Name                       | Description                                                         | Required | Default Value |
 |----------------------------|---------------------------------------------------------------------|----------|---------------|
-| `url`                      | The RabbitMQ server's URL.                                          | Yes      |               |
 | `queue.name`               | The name of the RabbitMQ queue where messages will be published to. | Yes      |               |
 | `queue.durable`            | Specifies whether the queue is durable.                             | No       | `true`        |
 | `queue.autoDelete`         | If the queue will auto-delete.                                      | No       | `false`       |
 | `queue.exclusive`          | If the queue is exclusive.                                          | No       | `false`       |
 | `queue.noWait`             | If the queue is declared without waiting for server reply.          | No       | `false`       |
-| `tls.clientCert`               | Path to the client certificate for TLS.                             | No       |               |
-| `tls.clientKey`                | Path to the client's key for TLS.                                   | No       |               |
-| `tls.caCert`                   | Path to the CA (Certificate Authority) certificate for TLS.         | No       |               |
 | `contentType`              | The MIME content type of the messages written to RabbitMQ.          | No       | `text/plain`  |
 | `delivery.contentEncoding` | The content encoding for the message.                               | No       |               |
 | `delivery.deliveryMode`    | Delivery mode of the message. Non-persistent (1) or persistent (2). | No       | `2`           |
