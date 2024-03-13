@@ -1,5 +1,6 @@
 version: "3"
 services:
+
   rabbitmq:
     image: rabbitmq:3.12-management
     container_name: rabbitmq
@@ -30,3 +31,18 @@ services:
       - ./certs:/etc/rabbitmq
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
 
+  # for development: starts fast, stops faster
+  rabbitmq-dev:
+    stop_grace_period: 100ms
+    image: rabbitmq:3.12-management
+    container_name: rabbitmq-dev
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 1s
+      timeout: 20s
+      retries: 10
+      start_period: 30s

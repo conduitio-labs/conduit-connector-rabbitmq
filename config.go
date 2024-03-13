@@ -62,7 +62,7 @@ type QueueConfig struct {
 	NoWait bool `json:"noWait" default:"false"`
 }
 
-// to use with ampq.Channel Consume method
+// to use with ampq.Channel Consume method.
 type ConsumerConfig struct {
 	// Name is the name of the consumer
 	Name string `json:"name"`
