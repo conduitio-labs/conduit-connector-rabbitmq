@@ -17,7 +17,7 @@ package main
 import (
 	sdk "github.com/conduitio/conduit-connector-sdk"
 
-	rabbitmq "github.com/alarbada/conduit-connector-rabbitmq"
+	rabbitmq "github.com/conduitio-labs/conduit-connector-rabbitmq"
 )
 
 func main() {

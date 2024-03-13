@@ -1,4 +1,4 @@
-module github.com/alarbada/conduit-connector-rabbitmq
+module github.com/conduitio-labs/conduit-connector-rabbitmq
 
 go 1.21
 

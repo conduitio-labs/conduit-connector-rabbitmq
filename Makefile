@@ -3,7 +3,7 @@
 VERSION=$(shell git describe --tags --dirty --always)
 
 build:
-	go build -ldflags "-X 'github.com/alarbada/conduit-connector-rabbitmq.version=${VERSION}'" -o conduit-connector-rabbitmq cmd/connector/main.go
+	go build -ldflags "-X 'github.com/conduitio-labs/conduit-connector-rabbitmq.version=${VERSION}'" -o conduit-connector-rabbitmq cmd/connector/main.go
 
 test:
 	docker compose -f test/docker-compose.yml up --quiet-pull -d --wait 
