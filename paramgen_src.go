@@ -9,31 +9,91 @@ import (
 
 func (SourceConfig) Parameters() map[string]sdk.Parameter {
 	return map[string]sdk.Parameter{
-		"caCert": {
+		"consumer.autoAck": {
+			Default:     "false",
+			Description: "autoAck indicates if the server should consider messages acknowledged once delivered.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"consumer.exclusive": {
+			Default:     "false",
+			Description: "exclusive indicates if the consumer should be exclusive.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"consumer.name": {
+			Default:     "",
+			Description: "name is the name of the consumer",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"consumer.noLocal": {
+			Default:     "false",
+			Description: "noLocal indicates if the server should not deliver messages published by the same connection.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"consumer.noWait": {
+			Default:     "false",
+			Description: "noWait indicates if the consumer should be declared without waiting for server confirmation.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"queue.autoDelete": {
+			Default:     "false",
+			Description: "autoDelete indicates if the queue will be deleted when there are no more consumers.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"queue.durable": {
+			Default:     "true",
+			Description: "durable indicates if the queue will survive broker restarts.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"queue.exclusive": {
+			Default:     "false",
+			Description: "exclusive indicates if the queue can be accessed by other connections.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"queue.name": {
+			Default:     "",
+			Description: "name is the name of the queue to consume from / publish to",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{
+				sdk.ValidationRequired{},
+			},
+		},
+		"queue.noWait": {
+			Default:     "false",
+			Description: "noWait indicates if the queue should be declared without waiting for server confirmation.",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
+		},
+		"tls.caCert": {
 			Default:     "",
 			Description: "caCert is the path to the CA certificate to use for TLS",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
-		"clientCert": {
+		"tls.clientCert": {
 			Default:     "",
 			Description: "clientCert is the path to the client certificate to use for TLS",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
-		"clientKey": {
+		"tls.clientKey": {
 			Default:     "",
 			Description: "clientKey is the path to the client key to use for TLS",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
-		"queueName": {
-			Default:     "",
-			Description: "queueName is the name of the queue to consume from / publish to",
-			Type:        sdk.ParameterTypeString,
-			Validations: []sdk.Validation{
-				sdk.ValidationRequired{},
-			},
+		"tls.enabled": {
+			Default:     "false",
+			Description: "enabled indicates if TLS should be used",
+			Type:        sdk.ParameterTypeBool,
+			Validations: []sdk.Validation{},
 		},
 		"url": {
 			Default:     "",
