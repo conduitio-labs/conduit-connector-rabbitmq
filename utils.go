@@ -124,7 +124,12 @@ func parseTLSConfig(ctx context.Context, config Config) (*tls.Config, error) {
 
 func ampqDial(ctx context.Context, config Config) (*amqp091.Connection, error) {
 	if !config.TLS.Enabled {
-		return amqp091.Dial(config.URL)
+		conn, err := amqp091.Dial(config.URL)
+		if err != nil {
+			return nil, fmt.Errorf("error dialing RabbitMQ: %w", err)
+		}
+
+		return conn, nil
 	}
 
 	tlsConfig, err := parseTLSConfig(ctx, config)
@@ -132,5 +137,10 @@ func ampqDial(ctx context.Context, config Config) (*amqp091.Connection, error) {
 		return nil, fmt.Errorf("error parsing TLS config: %w", err)
 	}
 
-	return amqp091.DialTLS(config.URL, tlsConfig)
+	conn, err := amqp091.DialTLS(config.URL, tlsConfig)
+	if err != nil {
+		return nil, fmt.Errorf("error dialing RabbitMQ with TLS: %w", err)
+	}
+
+	return conn, nil
 }

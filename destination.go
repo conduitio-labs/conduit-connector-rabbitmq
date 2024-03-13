@@ -154,7 +154,7 @@ func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, err
 	return len(records), nil
 }
 
-func (d *Destination) Teardown(_ context.Context) error {
+func (d *Destination) Teardown(ctx context.Context) error {
 	errs := make([]error, 0, 2)
 	if d.ch != nil {
 		if err := d.ch.Close(); err != nil {
@@ -172,7 +172,7 @@ func (d *Destination) Teardown(_ context.Context) error {
 		return err
 	}
 
-	sdk.Logger(context.Background()).Info().Msg("destination teardown complete")
+	sdk.Logger(ctx).Info().Msg("destination teardown complete")
 
 	return nil
 }

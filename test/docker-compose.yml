@@ -29,4 +29,3 @@ services:
     volumes:
       - ./certs:/etc/rabbitmq
       - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
-
