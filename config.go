@@ -115,8 +115,8 @@ type DeliveryConfig struct {
 	// ContentEncoding specifies the encoding of the message content.
 	ContentEncoding string `json:"contentEncoding"`
 
-	// ContentType specifies the MIME type of the message content. Default is "text/plain".
-	ContentType string `json:"contentType" default:"text/plain"`
+	// ContentType specifies the MIME type of the message content. Defaults to "application/json".
+	ContentType string `json:"contentType" default:"application/json"`
 
 	// DeliveryMode indicates the message delivery mode. Non-persistent (1) or persistent (2). Default is 2 (persistent).
 	DeliveryMode uint8 `json:"deliveryMode" default:"2" validation:"inclusion=1|2"`

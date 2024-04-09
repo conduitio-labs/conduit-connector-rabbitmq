@@ -22,8 +22,8 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 			Validations: []sdk.Validation{},
 		},
 		"delivery.contentType": {
-			Default:     "text/plain",
-			Description: "contentType specifies the MIME type of the message content. Default is \"text/plain\".",
+			Default:     "application/json",
+			Description: "contentType specifies the MIME type of the message content. Defaults to \"application/json\".",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
