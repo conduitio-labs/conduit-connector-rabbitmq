@@ -127,8 +127,8 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 
 		var (
 			pos = Position{
-				DeliveryTag:  msg.DeliveryTag,
-				QueueName:    s.queue.Name,
+				DeliveryTag: msg.DeliveryTag,
+				QueueName:   s.queue.Name,
 			}
 			sdkPos   = pos.ToSdkPosition()
 			metadata = metadataFromMessage(msg)

@@ -1,6 +1,20 @@
 # Conduit Connector for RabbitMQ
-The RabbitMQ connector is one of [Conduit](https://github.com/ConduitIO/conduit) builtin plugins. It provides both, a
-source and a destination connector for [RabbitMQ](https://rabbitmq.com/).
+
+The RabbitMQ connector is one of [Conduit](https://github.com/ConduitIO/conduit) builtin plugins. It provides both, a source and a destination connector for [RabbitMQ](https://rabbitmq.com/).
+
+It uses the [AMQP 0-9-1 Model](https://www.rabbitmq.com/tutorials/amqp-concepts) to connect to RabbitMQ.
+
+
+## What data does the OpenCDC record consist of?
+
+| Field                   | Description                                                                             |
+|-------------------------|-----------------------------------------------------------------------------------------|
+| `record.Position`       | json object with the delivery tag and the queue name from where the record was read from.|
+| `record.Operation`      | currently fixed as "create".                                                            |
+| `record.Metadata`       | a string to string map, with keys prefixed as `rabbitmq.{DELIVERY_PROPERTY}`.           |
+| `record.Key`            | the message id from the read message.                                                    |
+| `record.Payload.Before` | <empty>                                                                                 |
+| `record.Payload.After`  | the message body                                                                        |
 
 ## How to Build?
 
