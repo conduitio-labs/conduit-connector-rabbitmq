@@ -4,22 +4,9 @@ services:
     image: rabbitmq:3.12-management
     container_name: rabbitmq
     ports:
-      - "5672:5672"
-      - "15672:15672"
-
-    healthcheck:
-      test: rabbitmq-diagnostics -q ping
-      interval: 5s
-      timeout: 20s
-      retries: 6
-      start_period: 30s
-
-  rabbitmq-tls:
-    image: rabbitmq:3.12-management
-    container_name: rabbitmq-tls
-    ports:
-      - "5671:5671"
-
+      - "5671:5671"   # tls
+      - "5672:5672"   # non tls
+      - "15672:15672" # admin
     healthcheck:
       test: rabbitmq-diagnostics -q ping
       interval: 5s
