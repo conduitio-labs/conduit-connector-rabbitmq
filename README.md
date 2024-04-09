@@ -64,3 +64,51 @@ Tests require docker-compose v2.
 | `exchange.internal`        | If the exchange is internal.                                        | No       | `false`       |
 | `exchange.noWait`          | If the exchange is declared without waiting for server reply.       | No       | `false`       |
 | `routingKey`               | The routing key to use when publishing to an exchange.              | No       |               |
+
+
+## Example pipeline.yml file
+
+Here's an example of a `pipeline.yml` file using `file to RabbitMQ` and `RabbitMQ to file` pipelines: 
+
+```yaml
+version: 2.0
+pipelines:
+  - id: file-to-rabbitmq
+    status: running
+    connectors:
+      - id: file.in
+        type: source
+        plugin: builtin:file
+        name: file-destination
+        settings:
+          path: ./file.in
+      - id: rabbitmq.out
+        type: destination
+        plugin: standalone:rabbitmq
+        name: rabbitmq-source
+        settings:
+          url: amqp://guest:guest@localhost:5672/
+          queue.name: demo-queue
+          sdk.record.format: template
+          sdk.record.format.options: '{{ printf "%s" .Payload.After }}'
+
+  - id: rabbitmq-to-file
+    status: running
+    connectors:
+      - id: rabbitmq.in
+        type: source
+        plugin: standalone:rabbitmq
+        name: rabbitmq-source
+        settings:
+          url: amqp://guest:guest@localhost:5672/
+          queue.name: demo-queue
+
+      - id: file.out
+        type: destination
+        plugin: builtin:file
+        name: file-destination
+        settings:
+          path: ./file.out
+          sdk.record.format: template
+          sdk.record.format.options: '{{ printf "%s" .Payload.After }}'
+```
