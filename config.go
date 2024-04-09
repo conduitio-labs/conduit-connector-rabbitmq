@@ -28,7 +28,8 @@ type Config struct {
 	// URL is the RabbitMQ server URL
 	URL string `json:"url" validate:"required"`
 
-	TLS TLSConfig `json:"tls"`
+	TLS   TLSConfig   `json:"tls"`
+	Queue QueueConfig `json:"queue"`
 }
 
 type TLSConfig struct {
@@ -83,7 +84,6 @@ type ConsumerConfig struct {
 type SourceConfig struct {
 	Config
 
-	Queue    QueueConfig    `json:"queue"`
 	Consumer ConsumerConfig `json:"consumer"`
 }
 
@@ -152,7 +152,6 @@ type DeliveryConfig struct {
 type DestinationConfig struct {
 	Config
 
-	Queue    QueueConfig    `json:"queue"`
 	Delivery DeliveryConfig `json:"delivery"`
 	Exchange ExchangeConfig `json:"exchange"`
 

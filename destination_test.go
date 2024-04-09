@@ -51,18 +51,16 @@ func generate3Records(queueName string) []sdk.Record {
 
 func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey string) {
 	ctx := context.Background()
-	sharedCfg := Config{URL: testURL}
+	sharedCfg := Config{URL: testURL, Queue: QueueConfig{Name: queueName}}
 
 	srcCfg := SourceConfig{
 		Config: sharedCfg,
-		Queue:  QueueConfig{Name: queueName},
 	}.toMap()
 	destCfg := DestinationConfig{
 		Config: sharedCfg,
 		Delivery: DeliveryConfig{
 			ContentType: "text/plain",
 		},
-		Queue: QueueConfig{Name: queueName},
 		Exchange: ExchangeConfig{
 			Name: exchangeName,
 			Type: exchangeType,
