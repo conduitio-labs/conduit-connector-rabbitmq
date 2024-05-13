@@ -7,7 +7,7 @@ require (
 	github.com/golangci/golangci-lint v1.58.1
 	github.com/google/uuid v1.6.0
 	github.com/matryer/is v1.4.1
-	github.com/rabbitmq/amqp091-go v1.9.0
+	github.com/rabbitmq/amqp091-go v1.10.0
 	go.uber.org/mock v0.4.0
 )
 
