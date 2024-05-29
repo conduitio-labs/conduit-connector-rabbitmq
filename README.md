@@ -1,6 +1,6 @@
 # Conduit Connector for RabbitMQ
 
-The RabbitMQ connector is one of [Conduit](https://github.com/ConduitIO/conduit) standalone plugins. It provides both, a source and a destination connector for [RabbitMQ](https://rabbitmq.com/).
+The RabbitMQ connector is one of [Conduit](https://github.com/ConduitIO/conduit) standalone plugins. It provides both a source and a destination connector for [RabbitMQ](https://rabbitmq.com/).
 
 It uses the [AMQP 0-9-1 Model](https://www.rabbitmq.com/tutorials/amqp-concepts) to connect to RabbitMQ.
 
