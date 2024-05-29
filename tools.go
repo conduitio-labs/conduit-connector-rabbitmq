@@ -14,7 +14,7 @@
 
 //go:build tools
 
-package rabbitmq
+package main
 
 import (
 	_ "github.com/conduitio/conduit-connector-sdk/cmd/paramgen"

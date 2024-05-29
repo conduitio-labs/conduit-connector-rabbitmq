@@ -15,10 +15,6 @@ test:
 generate:
 	go generate ./...
 
-.PHONY: lint
-lint:
-	golangci-lint run
-
 .PHONY: acceptance
 acceptance:
 	go test -v -race -count=1 -run TestAcceptance .
@@ -30,6 +26,10 @@ up:
 .PHONY: down
 down:
 	docker compose -f test/docker-compose.yml down -v --remove-orphans
+
+.PHONY: lint
+lint:
+	golangci-lint run
 
 .PHONY: install-tools
 install-tools:
