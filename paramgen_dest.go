@@ -9,24 +9,6 @@ import (
 
 func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 	return map[string]sdk.Parameter{
-		"caCert": {
-			Default:     "",
-			Description: "caCert is the path to the CA certificate to use for TLS",
-			Type:        sdk.ParameterTypeString,
-			Validations: []sdk.Validation{},
-		},
-		"clientCert": {
-			Default:     "",
-			Description: "clientCert is the path to the client certificate to use for TLS",
-			Type:        sdk.ParameterTypeString,
-			Validations: []sdk.Validation{},
-		},
-		"clientKey": {
-			Default:     "",
-			Description: "clientKey is the path to the client key to use for TLS",
-			Type:        sdk.ParameterTypeString,
-			Validations: []sdk.Validation{},
-		},
 		"delivery.appID": {
 			Default:     "",
 			Description: "appID specifies the application that created the message.",
@@ -40,8 +22,8 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 			Validations: []sdk.Validation{},
 		},
 		"delivery.contentType": {
-			Default:     "text/plain",
-			Description: "contentType specifies the MIME type of the message content. Default is \"text/plain\".",
+			Default:     "application/json",
+			Description: "contentType specifies the MIME type of the message content. Defaults to \"application/json\".",
 			Type:        sdk.ParameterTypeString,
 			Validations: []sdk.Validation{},
 		},
@@ -85,7 +67,10 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 			Default:     "0",
 			Description: "priority specifies the message priority. Ranges from 0 to 9. Default is 0.",
 			Type:        sdk.ParameterTypeInt,
-			Validations: []sdk.Validation{},
+			Validations: []sdk.Validation{
+				sdk.ValidationGreaterThan{Value: -1},
+				sdk.ValidationLessThan{Value: 10},
+			},
 		},
 		"delivery.replyTo": {
 			Default:     "",
@@ -153,24 +138,48 @@ func (DestinationConfig) Parameters() map[string]sdk.Parameter {
 			Type:        sdk.ParameterTypeBool,
 			Validations: []sdk.Validation{},
 		},
+		"queue.name": {
+			Default:     "",
+			Description: "name is the name of the queue to consume from / publish to",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{
+				sdk.ValidationRequired{},
+			},
+		},
 		"queue.noWait": {
 			Default:     "false",
 			Description: "noWait indicates if the queue should be declared without waiting for server confirmation.",
 			Type:        sdk.ParameterTypeBool,
 			Validations: []sdk.Validation{},
 		},
-		"queueName": {
-			Default:     "",
-			Description: "queueName is the name of the queue to consume from / publish to",
-			Type:        sdk.ParameterTypeString,
-			Validations: []sdk.Validation{
-				sdk.ValidationRequired{},
-			},
-		},
 		"routingKey": {
 			Default:     "",
 			Description: "routingKey is the routing key to use when publishing to an exchange",
 			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"tls.caCert": {
+			Default:     "",
+			Description: "caCert is the path to the CA certificate to use for TLS",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"tls.clientCert": {
+			Default:     "",
+			Description: "clientCert is the path to the client certificate to use for TLS",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"tls.clientKey": {
+			Default:     "",
+			Description: "clientKey is the path to the client key to use for TLS",
+			Type:        sdk.ParameterTypeString,
+			Validations: []sdk.Validation{},
+		},
+		"tls.enabled": {
+			Default:     "false",
+			Description: "enabled indicates if TLS should be used",
+			Type:        sdk.ParameterTypeBool,
 			Validations: []sdk.Validation{},
 		},
 		"url": {

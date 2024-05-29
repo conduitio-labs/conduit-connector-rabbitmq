@@ -40,9 +40,9 @@ func TestSource_Integration_RestartFull(t *testing.T) {
 
 	queueName := setupQueueName(t, is)
 	sourceCfg := SourceConfig{
-		Config: Config{URL: testURL},
-		Queue: QueueConfig{
-			Name: queueName,
+		Config: Config{
+			URL:   testURL,
+			Queue: QueueConfig{Name: queueName},
 		},
 	}
 
@@ -64,9 +64,9 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 	queueName := setupQueueName(t, is)
 
 	sourceCfg := SourceConfig{
-		Config: Config{URL: testURL},
-		Queue: QueueConfig{
-			Name: queueName,
+		Config: Config{
+			URL:   testURL,
+			Queue: QueueConfig{Name: queueName},
 		},
 	}
 

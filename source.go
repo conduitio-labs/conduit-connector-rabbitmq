@@ -115,7 +115,11 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 
 	select {
 	case <-ctx.Done():
-		return rec, ctx.Err()
+		err := ctx.Err()
+		if err != nil {
+			return rec, fmt.Errorf("context error: %w", err)
+		}
+		return rec, nil
 	case msg, ok := <-s.msgs:
 		if !ok {
 			return rec, errors.New("source message channel closed")
@@ -123,10 +127,8 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 
 		var (
 			pos = Position{
-				DeliveryTag:  msg.DeliveryTag,
-				QueueName:    s.queue.Name,
-				ExchangeName: msg.Exchange,
-				RoutingKey:   msg.RoutingKey,
+				DeliveryTag: msg.DeliveryTag,
+				QueueName:   s.queue.Name,
 			}
 			sdkPos   = pos.ToSdkPosition()
 			metadata = metadataFromMessage(msg)
@@ -155,7 +157,7 @@ func (s *Source) Ack(_ context.Context, position sdk.Position) error {
 	return nil
 }
 
-func (s *Source) Teardown(_ context.Context) error {
+func (s *Source) Teardown(ctx context.Context) error {
 	errs := make([]error, 0, 2)
 	if s.ch != nil {
 		if err := s.ch.Close(); err != nil {
@@ -173,7 +175,7 @@ func (s *Source) Teardown(_ context.Context) error {
 		return err
 	}
 
-	sdk.Logger(context.Background()).Debug().Msg("source teardown complete")
+	sdk.Logger(ctx).Debug().Msg("source teardown complete")
 
 	return nil
 }

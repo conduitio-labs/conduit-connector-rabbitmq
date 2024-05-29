@@ -28,7 +28,8 @@ type Config struct {
 	// URL is the RabbitMQ server URL
 	URL string `json:"url" validate:"required"`
 
-	TLS TLSConfig `json:"tls"`
+	TLS   TLSConfig   `json:"tls"`
+	Queue QueueConfig `json:"queue"`
 }
 
 type TLSConfig struct {
@@ -62,7 +63,7 @@ type QueueConfig struct {
 	NoWait bool `json:"noWait" default:"false"`
 }
 
-// to use with ampq.Channel Consume method
+// to use with ampq.Channel Consume method.
 type ConsumerConfig struct {
 	// Name is the name of the consumer
 	Name string `json:"name"`
@@ -83,7 +84,6 @@ type ConsumerConfig struct {
 type SourceConfig struct {
 	Config
 
-	Queue    QueueConfig    `json:"queue"`
 	Consumer ConsumerConfig `json:"consumer"`
 }
 
@@ -115,8 +115,8 @@ type DeliveryConfig struct {
 	// ContentEncoding specifies the encoding of the message content.
 	ContentEncoding string `json:"contentEncoding"`
 
-	// ContentType specifies the MIME type of the message content. Default is "text/plain".
-	ContentType string `json:"contentType" default:"text/plain"`
+	// ContentType specifies the MIME type of the message content. Defaults to "application/json".
+	ContentType string `json:"contentType" default:"application/json"`
 
 	// DeliveryMode indicates the message delivery mode. Non-persistent (1) or persistent (2). Default is 2 (persistent).
 	DeliveryMode uint8 `json:"deliveryMode" default:"2" validation:"inclusion=1|2"`
@@ -152,7 +152,6 @@ type DeliveryConfig struct {
 type DestinationConfig struct {
 	Config
 
-	Queue    QueueConfig    `json:"queue"`
 	Delivery DeliveryConfig `json:"delivery"`
 	Exchange ExchangeConfig `json:"exchange"`
 
