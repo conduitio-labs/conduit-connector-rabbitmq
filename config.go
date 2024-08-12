@@ -14,13 +14,6 @@
 
 package rabbitmq
 
-import (
-	"encoding/json"
-	"fmt"
-
-	sdk "github.com/conduitio/conduit-connector-sdk"
-)
-
 //go:generate paramgen -output=paramgen_src.go SourceConfig
 //go:generate paramgen -output=paramgen_dest.go DestinationConfig
 
@@ -85,10 +78,6 @@ type SourceConfig struct {
 	Config
 
 	Consumer ConsumerConfig `json:"consumer"`
-}
-
-func (cfg SourceConfig) toMap() map[string]string {
-	return cfgToMap(cfg)
 }
 
 type ExchangeConfig struct {
@@ -157,59 +146,4 @@ type DestinationConfig struct {
 
 	// RoutingKey is the routing key to use when publishing to an exchange
 	RoutingKey string `json:"routingKey" default:""`
-}
-
-func (cfg DestinationConfig) toMap() map[string]string {
-	return cfgToMap(cfg)
-}
-
-func newDestinationConfig(cfg map[string]string) (DestinationConfig, error) {
-	var destCfg DestinationConfig
-	err := sdk.Util.ParseConfig(cfg, &destCfg)
-	if err != nil {
-		return destCfg, fmt.Errorf("invalid config: %w", err)
-	}
-
-	if destCfg.Delivery.ContentType == "" {
-		destCfg.Delivery.ContentType = "text/plain"
-	}
-
-	return destCfg, nil
-}
-
-// cfgToMap converts a config struct to a map. This is useful for more type
-// safety on tests.
-func cfgToMap(cfg any) map[string]string {
-	bs, err := json.Marshal(cfg)
-	if err != nil {
-		panic(err)
-	}
-
-	mAny := map[string]any{}
-	err = json.Unmarshal(bs, &mAny)
-	if err != nil {
-		panic(err)
-	}
-
-	m := map[string]string{}
-	for k, v := range mAny {
-		switch v := v.(type) {
-		case string:
-			m[k] = v
-		case bool:
-			m[k] = fmt.Sprintf("%t", v)
-		case float64:
-			// using %v to avoid scientific notation
-			m[k] = fmt.Sprintf("%v", v)
-		case map[string]any:
-			parsed := cfgToMap(v)
-			for k2, v := range parsed {
-				m[k+"."+k2] = v
-			}
-		default:
-			panic(fmt.Errorf("unsupported type used for cfgToMap func: %T", v))
-		}
-	}
-
-	return m
 }

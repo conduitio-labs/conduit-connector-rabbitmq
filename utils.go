@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -31,17 +32,17 @@ type Position struct {
 	QueueName   string `json:"queueName"`
 }
 
-func (p Position) ToSdkPosition() sdk.Position {
+func (p Position) ToSdkPosition() opencdc.Position {
 	bs, err := json.Marshal(p)
 	if err != nil {
 		// this error should not be possible
 		panic(fmt.Errorf("error marshaling position to JSON: %w", err))
 	}
 
-	return sdk.Position(bs)
+	return opencdc.Position(bs)
 }
 
-func parsePosition(pos sdk.Position) (Position, error) {
+func parsePosition(pos opencdc.Position) (Position, error) {
 	var p Position
 	err := json.Unmarshal([]byte(pos), &p)
 	if err != nil {
@@ -51,8 +52,8 @@ func parsePosition(pos sdk.Position) (Position, error) {
 	return p, nil
 }
 
-func metadataFromMessage(msg amqp091.Delivery) sdk.Metadata {
-	metadata := sdk.Metadata{}
+func metadataFromMessage(msg amqp091.Delivery) opencdc.Metadata {
+	metadata := opencdc.Metadata{}
 
 	setKey := func(key string, v any) {
 		if s, ok := v.(string); ok {
