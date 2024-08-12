@@ -19,29 +19,25 @@ import (
 	"testing"
 	"time"
 
+	"github.com/conduitio/conduit-commons/config"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/matryer/is"
 )
 
 func TestAcceptance(t *testing.T) {
-	cfg := map[string]string{
-		"url":        testURL,
-		"queue.name": "test-queue",
-	}
+	sourceCfg := config.Config{SourceConfigUrl: testURL}
+	destCfg := config.Config{DestinationConfigUrl: testURL}
 	is := is.New(t)
 
 	driver := sdk.ConfigurableAcceptanceTestDriver{
 		Config: sdk.ConfigurableAcceptanceTestDriverConfig{
 			Connector:         Connector,
-			SourceConfig:      cfg,
-			DestinationConfig: cfg,
+			SourceConfig:      sourceCfg,
+			DestinationConfig: destCfg,
 			BeforeTest: func(t *testing.T) {
 				queueName := setupQueueName(t, is)
-				cfg["queue.name"] = queueName
-			},
-			Skip: []string{
-				"TestSource_Configure_RequiredParams",
-				"TestDestination_Configure_RequiredParams",
+				sourceCfg[SourceConfigQueueName] = queueName
+				destCfg[DestinationConfigQueueName] = queueName
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,
@@ -54,20 +50,27 @@ func TestAcceptance(t *testing.T) {
 func TestAcceptance_TLS(t *testing.T) {
 	is := is.New(t)
 
-	cfg := Config{
-		URL: testURLTLS,
-		TLS: TLSConfig{
-			Enabled:    true,
-			ClientCert: "./test/certs/client.cert.pem",
-			ClientKey:  "./test/certs/client.key.pem",
-			CACert:     "./test/certs/ca.cert.pem",
-		},
+	sourceCfg := config.Config{
+		SourceConfigUrl:           testURLTLS,
+		SourceConfigQueueName:     "random-queue",
+		SourceConfigTlsEnabled:    "true",
+		SourceConfigTlsClientCert: "./test/certs/client.cert.pem",
+		SourceConfigTlsClientKey:  "./test/certs/client.key.pem",
+		SourceConfigTlsCaCert:     "./test/certs/ca.cert.pem",
+	}
+	destCfg := config.Config{
+		DestinationConfigUrl:           testURLTLS,
+		DestinationConfigQueueName:     "random-queue",
+		DestinationConfigTlsEnabled:    "true",
+		DestinationConfigTlsClientCert: "./test/certs/client.cert.pem",
+		DestinationConfigTlsClientKey:  "./test/certs/client.key.pem",
+		DestinationConfigTlsCaCert:     "./test/certs/ca.cert.pem",
 	}
 
-	sourceCfg := SourceConfig{Config: cfg}.toMap()
-	destCfg := DestinationConfig{Config: cfg}.toMap()
-
 	ctx := context.Background()
+	var cfg Config
+	err := sdk.Util.ParseConfig(ctx, sourceCfg, &cfg, SourceConfig{}.Parameters())
+	is.NoErr(err)
 
 	tlsConfig, err := parseTLSConfig(ctx, cfg)
 	is.NoErr(err)
@@ -79,15 +82,9 @@ func TestAcceptance_TLS(t *testing.T) {
 			DestinationConfig: destCfg,
 			BeforeTest: func(t *testing.T) {
 				queueName := setupQueueNameTLS(t, is, tlsConfig)
-				sourceCfg["queue.name"] = queueName
-				destCfg["queue.name"] = queueName
-				// TODO: I can see why this is necessary, but then, why does
-				// the previous acceptance test not need it?
-				destCfg["routingKey"] = queueName
-			},
-			Skip: []string{
-				"TestSource_Configure_RequiredParams",
-				"TestDestination_Configure_RequiredParams",
+				sourceCfg[SourceConfigQueueName] = queueName
+				destCfg[DestinationConfigQueueName] = queueName
+				destCfg[DestinationConfigRoutingKey] = queueName
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,

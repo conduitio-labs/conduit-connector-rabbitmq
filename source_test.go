@@ -20,7 +20,8 @@ import (
 	"testing"
 	"time"
 
-	sdk "github.com/conduitio/conduit-connector-sdk"
+	"github.com/conduitio/conduit-commons/config"
+	"github.com/conduitio/conduit-commons/opencdc"
 	"github.com/matryer/is"
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -39,11 +40,10 @@ func TestSource_Integration_RestartFull(t *testing.T) {
 	is := is.New(t)
 
 	queueName := setupQueueName(t, is)
-	sourceCfg := SourceConfig{
-		Config: Config{
-			URL:   testURL,
-			Queue: QueueConfig{Name: queueName},
-		},
+	sourceCfg := config.Config{
+		SourceConfigUrl:          testURL,
+		SourceConfigQueueName:    queueName,
+		SourceConfigQueueDurable: "false",
 	}
 
 	recs1 := generateRabbitmqMsgs(1, 3)
@@ -63,11 +63,10 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 	ctx := context.Background()
 	queueName := setupQueueName(t, is)
 
-	sourceCfg := SourceConfig{
-		Config: Config{
-			URL:   testURL,
-			Queue: QueueConfig{Name: queueName},
-		},
+	sourceCfg := config.Config{
+		SourceConfigUrl:          testURL,
+		SourceConfigQueueName:    queueName,
+		SourceConfigQueueDurable: "false",
 	}
 
 	recs1 := generateRabbitmqMsgs(1, 3)
@@ -135,23 +134,24 @@ func produceRabbitmqMsgs(ctx context.Context, is *is.I, queueName string, msgs [
 func testSourceIntegrationRead(
 	ctx context.Context,
 	is *is.I,
-	cfg SourceConfig,
-	startFrom sdk.Position,
+	cfg config.Config,
+	startFrom opencdc.Position,
 	wantRecords []amqp091.Publishing,
 	ackFirstOnly bool,
-) sdk.Position {
+) opencdc.Position {
+	is.Helper()
 	underTest := NewSource()
 	defer func() {
 		err := underTest.Teardown(ctx)
 		is.NoErr(err)
 	}()
 
-	err := underTest.Configure(ctx, cfg.toMap())
+	err := underTest.Configure(ctx, cfg)
 	is.NoErr(err)
 	err = underTest.Open(ctx, startFrom)
 	is.NoErr(err)
 
-	var positions []sdk.Position
+	var positions []opencdc.Position
 	for _, wantRecord := range wantRecords {
 		rec, err := underTest.Read(ctx)
 		is.NoErr(err)

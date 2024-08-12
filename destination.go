@@ -19,6 +19,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/conduitio/conduit-commons/config"
+	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -36,14 +38,17 @@ func NewDestination() sdk.Destination {
 	return sdk.DestinationWithMiddleware(&Destination{}, sdk.DefaultDestinationMiddleware()...)
 }
 
-func (d *Destination) Parameters() map[string]sdk.Parameter {
+func (d *Destination) Parameters() config.Parameters {
 	return d.config.Parameters()
 }
 
-func (d *Destination) Configure(ctx context.Context, cfg map[string]string) (err error) {
-	d.config, err = newDestinationConfig(cfg)
-	if err != nil {
+func (d *Destination) Configure(ctx context.Context, cfg config.Config) (err error) {
+	if err := sdk.Util.ParseConfig(ctx, cfg, &d.config, d.config.Parameters()); err != nil {
 		return fmt.Errorf("invalid config: %w", err)
+	}
+
+	if d.config.Delivery.ContentType == "" {
+		d.config.Delivery.ContentType = "text/plain"
 	}
 
 	if d.config.RoutingKey == "" {
@@ -107,7 +112,7 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	return nil
 }
 
-func (d *Destination) Write(ctx context.Context, records []sdk.Record) (int, error) {
+func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int, error) {
 	for i, record := range records {
 		msgID := string(record.Position)
 		msg := amqp091.Publishing{

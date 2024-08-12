@@ -21,26 +21,28 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/conduitio/conduit-commons/config"
+	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/google/uuid"
 	"github.com/matryer/is"
 )
 
-func generate3Records(queueName string) []sdk.Record {
-	recs := []sdk.Record{}
+func generate3Records(queueName string) []opencdc.Record {
+	recs := []opencdc.Record{}
 
 	for i := 0; i < 3; i++ {
 		exampleMessage := fmt.Sprintf("example message %d", i)
 
-		// We are not using the sdk.Position for resuming from a position, so
+		// We are not using the opencdc.Position for resuming from a position, so
 		// we can just use a random unique UUID
 		position := []byte(uuid.NewString())
 
 		rec := sdk.Util.Source.NewRecordCreate(
 			position,
-			sdk.Metadata{"rabbitmq.queue": queueName},
-			sdk.RawData("test-key"),
-			sdk.RawData(exampleMessage),
+			opencdc.Metadata{"rabbitmq.queue": queueName},
+			opencdc.RawData("test-key"),
+			opencdc.RawData(exampleMessage),
 		)
 
 		recs = append(recs, rec)
@@ -51,22 +53,19 @@ func generate3Records(queueName string) []sdk.Record {
 
 func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey string) {
 	ctx := context.Background()
-	sharedCfg := Config{URL: testURL, Queue: QueueConfig{Name: queueName}}
 
-	srcCfg := SourceConfig{
-		Config: sharedCfg,
-	}.toMap()
-	destCfg := DestinationConfig{
-		Config: sharedCfg,
-		Delivery: DeliveryConfig{
-			ContentType: "text/plain",
-		},
-		Exchange: ExchangeConfig{
-			Name: exchangeName,
-			Type: exchangeType,
-		},
-		RoutingKey: routingKey,
-	}.toMap()
+	sourceCfg := config.Config{
+		SourceConfigUrl:       testURL,
+		SourceConfigQueueName: queueName,
+	}
+	destCfg := config.Config{
+		DestinationConfigUrl:                 testURL,
+		DestinationConfigQueueName:           queueName,
+		DestinationConfigDeliveryContentType: "text/plain",
+		DestinationConfigExchangeName:        exchangeName,
+		DestinationConfigExchangeType:        exchangeType,
+		DestinationConfigRoutingKey:          routingKey,
+	}
 
 	dest := NewDestination()
 	err := dest.Configure(ctx, destCfg)
@@ -80,8 +79,8 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 	_, err = dest.Write(ctx, recs)
 	is.NoErr(err)
 
-	src := NewSource().(*Source)
-	err = src.Configure(ctx, srcCfg)
+	src := NewSource()
+	err = src.Configure(ctx, sourceCfg)
 	is.NoErr(err)
 
 	err = src.Open(ctx, nil)

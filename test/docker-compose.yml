@@ -1,11 +1,10 @@
-version: "3"
 services:
   rabbitmq:
     image: rabbitmq:3.12-management
     container_name: rabbitmq
     ports:
-      - "5671:5671"   # tls
-      - "5672:5672"   # non tls
+      - "5671:5671" # tls
+      - "5672:5672" # non tls
       - "15672:15672" # admin
     healthcheck:
       test: rabbitmq-diagnostics -q ping

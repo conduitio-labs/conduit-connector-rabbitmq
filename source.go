@@ -19,6 +19,8 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/conduitio/conduit-commons/config"
+	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -38,12 +40,12 @@ func NewSource() sdk.Source {
 	return sdk.SourceWithMiddleware(&Source{}, sdk.DefaultSourceMiddleware()...)
 }
 
-func (s *Source) Parameters() map[string]sdk.Parameter {
+func (s *Source) Parameters() config.Parameters {
 	return s.config.Parameters()
 }
 
-func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
-	err := sdk.Util.ParseConfig(cfg, &s.config)
+func (s *Source) Configure(ctx context.Context, cfg config.Config) error {
+	err := sdk.Util.ParseConfig(ctx, cfg, &s.config, s.config.Parameters())
 	if err != nil {
 		return fmt.Errorf("invalid config: %w", err)
 	}
@@ -52,7 +54,7 @@ func (s *Source) Configure(ctx context.Context, cfg map[string]string) error {
 	return nil
 }
 
-func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
+func (s *Source) Open(ctx context.Context, sdkPos opencdc.Position) (err error) {
 	s.conn, err = ampqDial(ctx, s.config.Config)
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
@@ -110,8 +112,8 @@ func (s *Source) Open(ctx context.Context, sdkPos sdk.Position) (err error) {
 	return nil
 }
 
-func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
-	var rec sdk.Record
+func (s *Source) Read(ctx context.Context) (opencdc.Record, error) {
+	var rec opencdc.Record
 
 	select {
 	case <-ctx.Done():
@@ -132,8 +134,8 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 			}
 			sdkPos   = pos.ToSdkPosition()
 			metadata = metadataFromMessage(msg)
-			key      = sdk.RawData(msg.MessageId)
-			payload  = sdk.RawData(msg.Body)
+			key      = opencdc.RawData(msg.MessageId)
+			payload  = opencdc.RawData(msg.Body)
 		)
 
 		rec = sdk.Util.Source.NewRecordCreate(sdkPos, metadata, key, payload)
@@ -144,7 +146,7 @@ func (s *Source) Read(ctx context.Context) (sdk.Record, error) {
 	}
 }
 
-func (s *Source) Ack(_ context.Context, position sdk.Position) error {
+func (s *Source) Ack(_ context.Context, position opencdc.Position) error {
 	pos, err := parsePosition(position)
 	if err != nil {
 		return fmt.Errorf("failed to parse position: %w", err)
