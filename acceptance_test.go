@@ -25,8 +25,8 @@ import (
 )
 
 func TestAcceptance(t *testing.T) {
-	sourceCfg := config.Config{SourceConfigUrl: testURL}
-	destCfg := config.Config{DestinationConfigUrl: testURL}
+	sourceCfg := config.Config{"url": testURL}
+	destCfg := config.Config{"url": testURL}
 	is := is.New(t)
 
 	driver := sdk.ConfigurableAcceptanceTestDriver{
@@ -36,8 +36,8 @@ func TestAcceptance(t *testing.T) {
 			DestinationConfig: destCfg,
 			BeforeTest: func(t *testing.T) {
 				queueName := setupQueueName(t, is)
-				sourceCfg[SourceConfigQueueName] = queueName
-				destCfg[DestinationConfigQueueName] = queueName
+				sourceCfg["queue.name"] = queueName
+				destCfg["queue.name"] = queueName
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,
@@ -51,25 +51,25 @@ func TestAcceptance_TLS(t *testing.T) {
 	is := is.New(t)
 
 	sourceCfg := config.Config{
-		SourceConfigUrl:           testURLTLS,
-		SourceConfigQueueName:     "random-queue",
-		SourceConfigTlsEnabled:    "true",
-		SourceConfigTlsClientCert: "./test/certs/client.cert.pem",
-		SourceConfigTlsClientKey:  "./test/certs/client.key.pem",
-		SourceConfigTlsCaCert:     "./test/certs/ca.cert.pem",
+		"url":            testURLTLS,
+		"queue.name":     "random-queue",
+		"tls.enabled":    "true",
+		"tls.clientCert": "./test/certs/client.cert.pem",
+		"tls.clientKey":  "./test/certs/client.key.pem",
+		"tls.caCert":     "./test/certs/ca.cert.pem",
 	}
 	destCfg := config.Config{
-		DestinationConfigUrl:           testURLTLS,
-		DestinationConfigQueueName:     "random-queue",
-		DestinationConfigTlsEnabled:    "true",
-		DestinationConfigTlsClientCert: "./test/certs/client.cert.pem",
-		DestinationConfigTlsClientKey:  "./test/certs/client.key.pem",
-		DestinationConfigTlsCaCert:     "./test/certs/ca.cert.pem",
+		"url":            testURLTLS,
+		"queue.name":     "random-queue",
+		"tls.enabled":    "true",
+		"tls.clientCert": "./test/certs/client.cert.pem",
+		"tls.clientKey":  "./test/certs/client.key.pem",
+		"tls.caCert":     "./test/certs/ca.cert.pem",
 	}
 
 	ctx := context.Background()
 	var cfg Config
-	err := sdk.Util.ParseConfig(ctx, sourceCfg, &cfg, SourceConfig{}.Parameters())
+	err := sdk.Util.ParseConfig(ctx, sourceCfg, &cfg, Connector.NewSpecification().SourceParams)
 	is.NoErr(err)
 
 	tlsConfig, err := parseTLSConfig(ctx, cfg)
@@ -82,9 +82,9 @@ func TestAcceptance_TLS(t *testing.T) {
 			DestinationConfig: destCfg,
 			BeforeTest: func(t *testing.T) {
 				queueName := setupQueueNameTLS(t, is, tlsConfig)
-				sourceCfg[SourceConfigQueueName] = queueName
-				destCfg[DestinationConfigQueueName] = queueName
-				destCfg[DestinationConfigRoutingKey] = queueName
+				sourceCfg["queue.name"] = queueName
+				destCfg["queue.name"] = queueName
+				destCfg["routingKey"] = queueName
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,

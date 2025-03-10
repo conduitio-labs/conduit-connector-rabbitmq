@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/conduitio/conduit-commons/config"
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/rabbitmq/amqp091-go"
@@ -28,35 +27,18 @@ import (
 type Destination struct {
 	sdk.UnimplementedDestination
 
+	config DestinationConfig
+
 	conn *amqp091.Connection
 	ch   *amqp091.Channel
+}
 
-	config DestinationConfig
+func (d *Destination) Config() sdk.DestinationConfig {
+	return &d.config
 }
 
 func NewDestination() sdk.Destination {
-	return sdk.DestinationWithMiddleware(&Destination{}, sdk.DefaultDestinationMiddleware()...)
-}
-
-func (d *Destination) Parameters() config.Parameters {
-	return d.config.Parameters()
-}
-
-func (d *Destination) Configure(ctx context.Context, cfg config.Config) (err error) {
-	if err := sdk.Util.ParseConfig(ctx, cfg, &d.config, d.config.Parameters()); err != nil {
-		return fmt.Errorf("invalid config: %w", err)
-	}
-
-	if d.config.Delivery.ContentType == "" {
-		d.config.Delivery.ContentType = "text/plain"
-	}
-
-	if d.config.RoutingKey == "" {
-		d.config.RoutingKey = d.config.Queue.Name
-	}
-
-	sdk.Logger(ctx).Debug().Msg("destination configured")
-	return nil
+	return sdk.DestinationWithMiddleware(&Destination{})
 }
 
 func (d *Destination) Open(ctx context.Context) (err error) {

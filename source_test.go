@@ -22,6 +22,7 @@ import (
 
 	"github.com/conduitio/conduit-commons/config"
 	"github.com/conduitio/conduit-commons/opencdc"
+	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/matryer/is"
 	"github.com/rabbitmq/amqp091-go"
 )
@@ -40,10 +41,10 @@ func TestSource_Integration_RestartFull(t *testing.T) {
 	is := is.New(t)
 
 	queueName := setupQueueName(t, is)
-	sourceCfg := config.Config{
-		SourceConfigUrl:          testURL,
-		SourceConfigQueueName:    queueName,
-		SourceConfigQueueDurable: "false",
+	sourceCfg := map[string]string{
+		"url":           testURL,
+		"queue.name":    queueName,
+		"queue.durable": "false",
 	}
 
 	recs1 := generateRabbitmqMsgs(1, 3)
@@ -63,10 +64,10 @@ func TestSource_Integration_RestartPartial(t *testing.T) {
 	ctx := context.Background()
 	queueName := setupQueueName(t, is)
 
-	sourceCfg := config.Config{
-		SourceConfigUrl:          testURL,
-		SourceConfigQueueName:    queueName,
-		SourceConfigQueueDurable: "false",
+	sourceCfg := map[string]string{
+		"url":           testURL,
+		"queue.name":    queueName,
+		"queue.durable": "false",
 	}
 
 	recs1 := generateRabbitmqMsgs(1, 3)
@@ -140,20 +141,20 @@ func testSourceIntegrationRead(
 	ackFirstOnly bool,
 ) opencdc.Position {
 	is.Helper()
-	underTest := NewSource()
+	src := NewSource()
 	defer func() {
-		err := underTest.Teardown(ctx)
+		err := src.Teardown(ctx)
 		is.NoErr(err)
 	}()
 
-	err := underTest.Configure(ctx, cfg)
+	err := sdk.Util.ParseConfig(ctx, cfg, src.Config(), Connector.NewSpecification().SourceParams)
 	is.NoErr(err)
-	err = underTest.Open(ctx, startFrom)
-	is.NoErr(err)
+
+	is.NoErr(src.Open(ctx, startFrom))
 
 	var positions []opencdc.Position
 	for _, wantRecord := range wantRecords {
-		rec, err := underTest.Read(ctx)
+		rec, err := src.Read(ctx)
 		is.NoErr(err)
 
 		recPayload := string(rec.Payload.After.Bytes())
@@ -170,8 +171,7 @@ func testSourceIntegrationRead(
 		if i > 0 && ackFirstOnly {
 			break
 		}
-		err = underTest.Ack(ctx, p)
-		is.NoErr(err)
+		is.NoErr(src.Ack(ctx, p))
 	}
 
 	return positions[len(positions)-1]

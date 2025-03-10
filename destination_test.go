@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/conduitio/conduit-commons/config"
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/google/uuid"
@@ -31,7 +30,7 @@ import (
 func generate3Records(queueName string) []opencdc.Record {
 	recs := []opencdc.Record{}
 
-	for i := 0; i < 3; i++ {
+	for i := range 3 {
 		exampleMessage := fmt.Sprintf("example message %d", i)
 
 		// We are not using the opencdc.Position for resuming from a position, so
@@ -54,21 +53,22 @@ func generate3Records(queueName string) []opencdc.Record {
 func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey string) {
 	ctx := context.Background()
 
-	sourceCfg := config.Config{
-		SourceConfigUrl:       testURL,
-		SourceConfigQueueName: queueName,
+	sourceCfg := map[string]string{
+		"url":        testURL,
+		"queue.name": queueName,
 	}
-	destCfg := config.Config{
-		DestinationConfigUrl:                 testURL,
-		DestinationConfigQueueName:           queueName,
-		DestinationConfigDeliveryContentType: "text/plain",
-		DestinationConfigExchangeName:        exchangeName,
-		DestinationConfigExchangeType:        exchangeType,
-		DestinationConfigRoutingKey:          routingKey,
+
+	destCfg := map[string]string{
+		"url":                  testURL,
+		"queue.name":           queueName,
+		"delivery.contentType": "text/plain",
+		"exchange.name":        exchangeName,
+		"exchange.type":        exchangeType,
+		"routingKey":           routingKey,
 	}
 
 	dest := NewDestination()
-	err := dest.Configure(ctx, destCfg)
+	err := sdk.Util.ParseConfig(ctx, destCfg, dest.Config(), Connector.NewSpecification().DestinationParams)
 	is.NoErr(err)
 
 	err = dest.Open(ctx)
@@ -80,7 +80,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 	is.NoErr(err)
 
 	src := NewSource()
-	err = src.Configure(ctx, sourceCfg)
+	err = sdk.Util.ParseConfig(ctx, sourceCfg, src.Config(), Connector.NewSpecification().SourceParams)
 	is.NoErr(err)
 
 	err = src.Open(ctx, nil)
