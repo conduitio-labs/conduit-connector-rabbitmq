@@ -14,6 +14,7 @@ test:
 .PHONY: generate
 generate:
 	go generate ./...
+	conn-sdk-cli readmegen -w
 
 .PHONY: acceptance
 acceptance:

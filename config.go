@@ -14,8 +14,11 @@
 
 package rabbitmq
 
-//go:generate paramgen -output=paramgen_src.go SourceConfig
-//go:generate paramgen -output=paramgen_dest.go DestinationConfig
+import (
+	"context"
+
+	sdk "github.com/conduitio/conduit-connector-sdk"
+)
 
 type Config struct {
 	// URL is the RabbitMQ server URL
@@ -75,6 +78,7 @@ type ConsumerConfig struct {
 }
 
 type SourceConfig struct {
+	sdk.DefaultSourceMiddleware
 	Config
 
 	Consumer ConsumerConfig `json:"consumer"`
@@ -139,6 +143,7 @@ type DeliveryConfig struct {
 }
 
 type DestinationConfig struct {
+	sdk.DefaultDestinationMiddleware
 	Config
 
 	Delivery DeliveryConfig `json:"delivery"`
@@ -146,4 +151,16 @@ type DestinationConfig struct {
 
 	// RoutingKey is the routing key to use when publishing to an exchange
 	RoutingKey string `json:"routingKey" default:""`
+}
+
+func (config *DestinationConfig) Validate(context.Context) error {
+	if config.Delivery.ContentType == "" {
+		config.Delivery.ContentType = "text/plain"
+	}
+
+	if config.RoutingKey == "" {
+		config.RoutingKey = config.Queue.Name
+	}
+
+	return nil
 }

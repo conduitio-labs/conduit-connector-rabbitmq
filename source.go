@@ -19,7 +19,6 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/conduitio/conduit-commons/config"
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/rabbitmq/amqp091-go"
@@ -36,22 +35,12 @@ type Source struct {
 	config SourceConfig
 }
 
+func (s *Source) Config() sdk.SourceConfig {
+	return &s.config
+}
+
 func NewSource() sdk.Source {
-	return sdk.SourceWithMiddleware(&Source{}, sdk.DefaultSourceMiddleware()...)
-}
-
-func (s *Source) Parameters() config.Parameters {
-	return s.config.Parameters()
-}
-
-func (s *Source) Configure(ctx context.Context, cfg config.Config) error {
-	err := sdk.Util.ParseConfig(ctx, cfg, &s.config, s.config.Parameters())
-	if err != nil {
-		return fmt.Errorf("invalid config: %w", err)
-	}
-
-	sdk.Logger(ctx).Debug().Msg("source configured")
-	return nil
+	return sdk.SourceWithMiddleware(&Source{})
 }
 
 func (s *Source) Open(ctx context.Context, sdkPos opencdc.Position) (err error) {
