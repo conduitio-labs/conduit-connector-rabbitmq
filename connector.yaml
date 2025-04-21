@@ -8,81 +8,81 @@ specification:
   source:
     parameters:
       - name: queue.name
-        description: Name is the name of the queue to consume from / publish to
+        description: The name of the queue to consume from / publish to
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: url
-        description: URL is the RabbitMQ server URL
+        description: The RabbitMQ server URL
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: consumer.autoAck
-        description: AutoAck indicates if the server should consider messages acknowledged once delivered.
+        description: Indicates if the server should consider messages acknowledged once delivered.
         type: bool
         default: "false"
         validations: []
       - name: consumer.exclusive
-        description: Exclusive indicates if the consumer should be exclusive.
+        description: Indicates if the consumer should be exclusive.
         type: bool
         default: "false"
         validations: []
       - name: consumer.name
-        description: Name is the name of the consumer
+        description: The name of the consumer
         type: string
         default: ""
         validations: []
       - name: consumer.noLocal
-        description: NoLocal indicates if the server should not deliver messages published by the same connection.
+        description: Indicates if the server should not deliver messages published by the same connection.
         type: bool
         default: "false"
         validations: []
       - name: consumer.noWait
-        description: NoWait indicates if the consumer should be declared without waiting for server confirmation.
+        description: Indicates if the consumer should be declared without waiting for server confirmation.
         type: bool
         default: "false"
         validations: []
       - name: queue.autoDelete
-        description: AutoDelete indicates if the queue will be deleted when there are no more consumers.
+        description: Indicates if the queue will be deleted when there are no more consumers.
         type: bool
         default: "false"
         validations: []
       - name: queue.durable
-        description: Durable indicates if the queue will survive broker restarts.
+        description: Indicates if the queue will survive broker restarts.
         type: bool
         default: "true"
         validations: []
       - name: queue.exclusive
-        description: Exclusive indicates if the queue can be accessed by other connections.
+        description: Indicates if the queue can be accessed by other connections.
         type: bool
         default: "false"
         validations: []
       - name: queue.noWait
-        description: NoWait indicates if the queue should be declared without waiting for server confirmation.
+        description: Indicates if the queue should be declared without waiting for server confirmation.
         type: bool
         default: "false"
         validations: []
       - name: tls.caCert
-        description: CACert is the path to the CA certificate to use for TLS
+        description: The path to the CA certificate to use for TLS
         type: string
         default: ""
         validations: []
       - name: tls.clientCert
-        description: ClientCert is the path to the client certificate to use for TLS
+        description: The path to the client certificate to use for TLS
         type: string
         default: ""
         validations: []
       - name: tls.clientKey
-        description: ClientKey is the path to the client key to use for TLS
+        description: The path to the client key to use for TLS
         type: string
         default: ""
         validations: []
       - name: tls.enabled
-        description: Enabled indicates if TLS should be used
+        description: Indicates if TLS should be used
         type: bool
         default: "false"
         validations: []
@@ -149,66 +149,66 @@ specification:
   destination:
     parameters:
       - name: queue.name
-        description: Name is the name of the queue to consume from / publish to
+        description: The name of the queue to consume from / publish to
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: url
-        description: URL is the RabbitMQ server URL
+        description: The RabbitMQ server URL
         type: string
         default: ""
         validations:
           - type: required
             value: ""
       - name: delivery.appID
-        description: AppID specifies the application that created the message.
+        description: The application that created the message.
         type: string
         default: ""
         validations: []
       - name: delivery.contentEncoding
-        description: ContentEncoding specifies the encoding of the message content.
+        description: The encoding of the message content.
         type: string
         default: ""
         validations: []
       - name: delivery.contentType
-        description: ContentType specifies the MIME type of the message content. Defaults to "application/json".
+        description: The MIME type of the message content. Defaults to "application/json".
         type: string
         default: application/json
         validations: []
       - name: delivery.correlationID
-        description: CorrelationID is used to correlate RPC responses with requests.
+        description: The correlation ID used to correlate RPC responses with requests.
         type: string
         default: ""
         validations: []
       - name: delivery.deliveryMode
-        description: DeliveryMode indicates the message delivery mode. Non-persistent (1) or persistent (2). Default is 2 (persistent).
+        description: The message delivery mode. Non-persistent (1) or persistent (2). Default is 2 (persistent).
         type: int
         default: "2"
         validations: []
       - name: delivery.expiration
-        description: Expiration specifies the message expiration time, if any.
+        description: The message expiration time, if any.
         type: string
         default: ""
         validations: []
       - name: delivery.immediate
-        description: Immediate indicates if the message should be treated as immediate. If true, the message is not queued if no consumers are on the matching queue.
+        description: Indicates if the message should be treated as immediate. If true, the message is not queued if no consumers are on the matching queue.
         type: bool
         default: "false"
         validations: []
       - name: delivery.mandatory
-        description: Mandatory indicates if the message is mandatory. If true, tells the server to return the message if it cannot be routed to a queue.
+        description: Indicates if the message is mandatory. If true, tells the server to return the message if it cannot be routed to a queue.
         type: bool
         default: "false"
         validations: []
       - name: delivery.messageTypeName
-        description: MessageTypeName specifies the message type name.
+        description: The message type name.
         type: string
         default: ""
         validations: []
       - name: delivery.priority
-        description: Priority specifies the message priority. Ranges from 0 to 9. Default is 0.
+        description: The message priority. Ranges from 0 to 9. Default is 0.
         type: int
         default: "0"
         validations:
@@ -217,87 +217,87 @@ specification:
           - type: less-than
             value: "10"
       - name: delivery.replyTo
-        description: ReplyTo specifies the address to reply to.
+        description: The address to reply to.
         type: string
         default: ""
         validations: []
       - name: delivery.userID
-        description: UserID specifies the user who created the message. Useful for publishers.
+        description: The user who created the message. Useful for publishers.
         type: string
         default: ""
         validations: []
       - name: exchange.autoDelete
-        description: AutoDelete indicates if the exchange will be deleted when the last queue is unbound from it.
+        description: Indicates if the exchange will be deleted when the last queue is unbound from it.
         type: bool
         default: "false"
         validations: []
       - name: exchange.durable
-        description: Durable indicates if the exchange will survive broker restarts.
+        description: Indicates if the exchange will survive broker restarts.
         type: bool
         default: "true"
         validations: []
       - name: exchange.internal
-        description: Internal indicates if the exchange is used for internal purposes and cannot be directly published to by a client.
+        description: Indicates if the exchange is used for internal purposes and cannot be directly published to by a client.
         type: bool
         default: "false"
         validations: []
       - name: exchange.name
-        description: Name is the name of the exchange.
+        description: The name of the exchange.
         type: string
         default: ""
         validations: []
       - name: exchange.noWait
-        description: NoWait indicates if the exchange should be declared without waiting for server confirmation.
+        description: Indicates if the exchange should be declared without waiting for server confirmation.
         type: bool
         default: "false"
         validations: []
       - name: exchange.type
-        description: Type is the type of the exchange (e.g., direct, fanout, topic, headers).
+        description: The type of the exchange (e.g., direct, fanout, topic, headers).
         type: string
         default: ""
         validations: []
       - name: queue.autoDelete
-        description: AutoDelete indicates if the queue will be deleted when there are no more consumers.
+        description: Indicates if the queue will be deleted when there are no more consumers.
         type: bool
         default: "false"
         validations: []
       - name: queue.durable
-        description: Durable indicates if the queue will survive broker restarts.
+        description: Indicates if the queue will survive broker restarts.
         type: bool
         default: "true"
         validations: []
       - name: queue.exclusive
-        description: Exclusive indicates if the queue can be accessed by other connections.
+        description: Indicates if the queue can be accessed by other connections.
         type: bool
         default: "false"
         validations: []
       - name: queue.noWait
-        description: NoWait indicates if the queue should be declared without waiting for server confirmation.
+        description: Indicates if the queue should be declared without waiting for server confirmation.
         type: bool
         default: "false"
         validations: []
       - name: routingKey
-        description: RoutingKey is the routing key to use when publishing to an exchange
+        description: The routing key to use when publishing to an exchange
         type: string
         default: ""
         validations: []
       - name: tls.caCert
-        description: CACert is the path to the CA certificate to use for TLS
+        description: The path to the CA certificate to use for TLS
         type: string
         default: ""
         validations: []
       - name: tls.clientCert
-        description: ClientCert is the path to the client certificate to use for TLS
+        description: The path to the client certificate to use for TLS
         type: string
         default: ""
         validations: []
       - name: tls.clientKey
-        description: ClientKey is the path to the client key to use for TLS
+        description: The path to the client key to use for TLS
         type: string
         default: ""
         validations: []
       - name: tls.enabled
-        description: Enabled indicates if TLS should be used
+        description: Indicates if TLS should be used
         type: bool
         default: "false"
         validations: []
