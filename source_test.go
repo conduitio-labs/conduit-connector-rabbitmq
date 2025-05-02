@@ -98,7 +98,9 @@ func generateRabbitmqMsgs(from, to int) []amqp091.Publishing {
 			ContentType: "text/plain",
 			// setting testAppId asserts that the metadata is being set
 			AppId: testAppID,
-
+			Headers: amqp091.Table{
+				"app_id": testAppID,
+			},
 			Body: []byte(fmt.Sprintf("test-payload-%d", i)),
 		}
 
@@ -163,6 +165,7 @@ func testSourceIntegrationRead(
 
 		is.Equal(wantRecord.MessageId, string(rec.Key.Bytes()))
 		is.Equal(testAppID, rec.Metadata["rabbitmq.appId"])
+		is.Equal(testAppID, rec.Metadata[MetadataRabbitmqHeaderPrefix+"app_id"])
 
 		positions = append(positions, rec.Position)
 	}

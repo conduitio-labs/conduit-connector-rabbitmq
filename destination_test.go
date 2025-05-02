@@ -23,25 +23,26 @@ import (
 
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
-	"github.com/google/uuid"
 	"github.com/matryer/is"
 )
 
 func generate3Records(queueName string) []opencdc.Record {
-	recs := []opencdc.Record{}
+	var recs []opencdc.Record
 
 	for i := range 3 {
-		exampleMessage := fmt.Sprintf("example message %d", i)
+		pos := fmt.Sprintf(`{"deliveryTag":%d,"queueName":"%s"}`, i, queueName)
+		payload := fmt.Sprintf("example message %d", i)
 
-		// We are not using the opencdc.Position for resuming from a position, so
-		// we can just use a random unique UUID
-		position := []byte(uuid.NewString())
+		position := []byte(pos)
 
 		rec := sdk.Util.Source.NewRecordCreate(
 			position,
-			opencdc.Metadata{"rabbitmq.queue": queueName},
-			opencdc.RawData("test-key"),
-			opencdc.RawData(exampleMessage),
+			opencdc.Metadata{
+				"rabbitmq.queue": queueName,
+				MetadataRabbitmqHeaderPrefix + "queue_name": queueName,
+			},
+			opencdc.StructuredData{"id": i},
+			opencdc.RawData(payload),
 		)
 
 		recs = append(recs, rec)
@@ -91,6 +92,8 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 		readRec, err := src.Read(ctx)
 		is.NoErr(err)
 
+		is.Equal(readRec.Metadata[MetadataRabbitmqHeaderPrefix+"queue_name"], queueName)
+
 		var rec struct {
 			Payload struct {
 				After string `json:"after"`
@@ -112,7 +115,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 
 func TestDestination_ExchangeWorks(t *testing.T) {
 	is := is.New(t)
-	testExchange(is, "testQueue", "testDirectExchange", "direct", "specificRoutingKey")
-	testExchange(is, "testQueue", "testFanoutExchange", "fanout", "")
-	testExchange(is, "testQueue", "testTopicExchange", "topic", "specificRoutingKey")
+	testExchange(is, "testDirectQueue", "testDirectExchange", "direct", "specificRoutingKey")
+	testExchange(is, "testFanoutQueue", "testFanoutExchange", "fanout", "")
+	testExchange(is, "testTopicQueue", "testTopicExchange", "topic", "specificRoutingKey")
 }

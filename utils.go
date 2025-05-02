@@ -20,11 +20,15 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"os"
-
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/rabbitmq/amqp091-go"
+	"os"
+	"strings"
+)
+
+const (
+	MetadataRabbitmqHeaderPrefix = "rabbitmq.header."
 )
 
 type Position struct {
@@ -50,6 +54,17 @@ func parsePosition(pos opencdc.Position) (Position, error) {
 	}
 
 	return p, nil
+}
+
+func metadataToHeaders(metadata opencdc.Metadata) amqp091.Table {
+	headers := amqp091.Table{}
+	for k, v := range metadata {
+		if key, found := strings.CutPrefix(k, MetadataRabbitmqHeaderPrefix); found {
+			headers[key] = v
+		}
+	}
+
+	return headers
 }
 
 func metadataFromMessage(msg amqp091.Delivery) opencdc.Metadata {
@@ -82,6 +97,12 @@ func metadataFromMessage(msg amqp091.Delivery) opencdc.Metadata {
 	setKey("rabbitmq.redelivered", msg.Redelivered)
 	setKey("rabbitmq.exchange", msg.Exchange)
 	setKey("rabbitmq.routingKey", msg.RoutingKey)
+
+	for k, v := range msg.Headers {
+		// This will only set string values, ignoring everything else
+		// In AMQP 1.0, only string and numeric values are supported
+		setKey(MetadataRabbitmqHeaderPrefix+k, v)
+	}
 
 	return metadata
 }

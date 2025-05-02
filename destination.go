@@ -109,6 +109,7 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			Type:      d.config.Delivery.MessageTypeName,
 			UserId:    d.config.Delivery.UserID,
 			AppId:     d.config.Delivery.AppID,
+			Headers:   metadataToHeaders(record.Metadata),
 			Body:      record.Bytes(),
 
 			Expiration: d.config.Delivery.Expiration,
