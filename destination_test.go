@@ -24,9 +24,10 @@ import (
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/matryer/is"
+	"github.com/rabbitmq/amqp091-go"
 )
 
-func generate3Records(queueName string) []opencdc.Record {
+func generate3Records(queueName, routingKey string) []opencdc.Record {
 	var recs []opencdc.Record
 
 	for i := range 3 {
@@ -38,7 +39,8 @@ func generate3Records(queueName string) []opencdc.Record {
 		rec := sdk.Util.Source.NewRecordCreate(
 			position,
 			opencdc.Metadata{
-				"rabbitmq.queue": queueName,
+				"rabbitmq.queue":                            queueName,
+				MetadataRabbitmqRoutingKey:                  routingKey,
 				MetadataRabbitmqHeaderPrefix + "queue_name": queueName,
 			},
 			opencdc.StructuredData{"id": i},
@@ -51,12 +53,17 @@ func generate3Records(queueName string) []opencdc.Record {
 	return recs
 }
 
-func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey string) {
+func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey, routingKeyTemplate string) {
 	ctx := context.Background()
 
 	sourceCfg := map[string]string{
 		"url":        testURL,
 		"queue.name": queueName,
+	}
+
+	routingKeyCfg := routingKey
+	if routingKeyTemplate != "" {
+		routingKeyCfg = routingKeyTemplate
 	}
 
 	destCfg := map[string]string{
@@ -65,7 +72,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 		"delivery.contentType": "text/plain",
 		"exchange.name":        exchangeName,
 		"exchange.type":        exchangeType,
-		"routingKey":           routingKey,
+		"routingKey":           routingKeyCfg,
 	}
 
 	dest := NewDestination()
@@ -76,7 +83,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 	is.NoErr(err)
 	defer teardownResource(ctx, is, dest)
 
-	recs := generate3Records(queueName)
+	recs := generate3Records(queueName, routingKey)
 	_, err = dest.Write(ctx, recs)
 	is.NoErr(err)
 
@@ -92,6 +99,7 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 		readRec, err := src.Read(ctx)
 		is.NoErr(err)
 
+		is.Equal(readRec.Metadata[MetadataRabbitmqRoutingKey], routingKey)
 		is.Equal(readRec.Metadata[MetadataRabbitmqHeaderPrefix+"queue_name"], queueName)
 
 		var rec struct {
@@ -115,7 +123,38 @@ func testExchange(is *is.I, queueName, exchangeName, exchangeType, routingKey st
 
 func TestDestination_ExchangeWorks(t *testing.T) {
 	is := is.New(t)
-	testExchange(is, "testDirectQueue", "testDirectExchange", "direct", "specificRoutingKey")
-	testExchange(is, "testFanoutQueue", "testFanoutExchange", "fanout", "")
-	testExchange(is, "testTopicQueue", "testTopicExchange", "topic", "specificRoutingKey")
+	testExchange(is, "testDirectQueue", "testDirectExchange", "direct", "specificRoutingKey", "")
+	testExchange(is, "testFanoutQueue", "testFanoutExchange", "fanout", "testFanoutQueue", "")
+	testExchange(is, "testTopicQueue", "testTopicExchange", "topic", "specificRoutingKey", "")
+}
+
+func TestDestination_MetadataRoutingKeyWorks(t *testing.T) {
+	is := is.New(t)
+
+	exchangeName := "testTopicExchangeWithMetadataRoutingKey"
+	queueName := "testTopicQueueWithMetadataRoutingKey"
+	routingKey := "specificRoutingKey"
+
+	// Create queue to exchange binding
+	conn, err := amqp091.Dial(testURL)
+	is.NoErr(err)
+	ch, err := conn.Channel()
+	is.NoErr(err)
+
+	_, err = ch.QueueDeclare(queueName, true, false, false, false, nil)
+	is.NoErr(err)
+
+	err = ch.ExchangeDeclare(exchangeName, "topic", true, false, false, false, nil)
+	is.NoErr(err)
+	err = ch.QueueBind(queueName, routingKey, exchangeName, false, nil)
+	is.NoErr(err)
+	conn.Close()
+
+	testExchange(is,
+		queueName,
+		exchangeName,
+		"topic",
+		routingKey,
+		`{{ index .Metadata "rabbitmq.routingKey" }}`,
+	)
 }

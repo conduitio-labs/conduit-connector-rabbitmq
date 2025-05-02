@@ -20,14 +20,16 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
 	"github.com/rabbitmq/amqp091-go"
-	"os"
-	"strings"
 )
 
 const (
+	MetadataRabbitmqRoutingKey   = "rabbitmq.routingKey"
 	MetadataRabbitmqHeaderPrefix = "rabbitmq.header."
 )
 
@@ -96,7 +98,7 @@ func metadataFromMessage(msg amqp091.Delivery) opencdc.Metadata {
 	setKey("rabbitmq.deliveryTag", msg.DeliveryTag)
 	setKey("rabbitmq.redelivered", msg.Redelivered)
 	setKey("rabbitmq.exchange", msg.Exchange)
-	setKey("rabbitmq.routingKey", msg.RoutingKey)
+	setKey(MetadataRabbitmqRoutingKey, msg.RoutingKey)
 
 	for k, v := range msg.Headers {
 		// This will only set string values, ignoring everything else

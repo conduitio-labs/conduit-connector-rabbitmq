@@ -31,6 +31,9 @@ type Destination struct {
 
 	conn *amqp091.Connection
 	ch   *amqp091.Channel
+
+	routingKey    string
+	getRoutingKey RoutingKeyFn
 }
 
 func (d *Destination) Config() sdk.DestinationConfig {
@@ -42,6 +45,15 @@ func NewDestination() sdk.Destination {
 }
 
 func (d *Destination) Open(ctx context.Context) (err error) {
+	routingKey, routingKeyFn, err := d.config.ParseRoutingKey()
+	if err != nil {
+		// Unlikely to happen, as the topic is validated in the config.
+		return fmt.Errorf("failed to parse routingKey: %w", err)
+	}
+
+	d.routingKey = routingKey
+	d.getRoutingKey = routingKeyFn
+
 	d.conn, err = ampqDial(ctx, d.config.Config)
 	if err != nil {
 		return fmt.Errorf("failed to dial: %w", err)
@@ -81,14 +93,16 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 		}
 		sdk.Logger(ctx).Debug().Any("exchange config", d.config.Exchange).Msgf("declared exchange")
 
-		err = d.ch.QueueBind(d.config.Queue.Name, d.config.RoutingKey, d.config.Exchange.Name, false, nil)
-		if err != nil {
-			return fmt.Errorf("failed to bind queue to exchange: %w", err)
+		if routingKeyFn == nil {
+			err = d.ch.QueueBind(d.config.Queue.Name, d.routingKey, d.config.Exchange.Name, false, nil)
+			if err != nil {
+				return fmt.Errorf("failed to bind queue to exchange: %w", err)
+			}
+			sdk.Logger(ctx).Debug().Msgf(
+				"bound queue %s to exchange %s with routing key %s",
+				d.config.Queue.Name, d.config.Exchange.Name, d.routingKey,
+			)
 		}
-		sdk.Logger(ctx).Debug().Msgf(
-			"bound queue %s to exchange %s with routing key %s",
-			d.config.Queue.Name, d.config.Exchange.Name, d.config.RoutingKey,
-		)
 	}
 
 	return nil
@@ -119,10 +133,19 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			msg.Timestamp = createdAt
 		}
 
+		routingKey := d.routingKey
+		if d.getRoutingKey != nil {
+			var err error
+			routingKey, err = d.getRoutingKey(record)
+			if err != nil {
+				return i, fmt.Errorf("could not get routingKey: %w", err)
+			}
+		}
+
 		err := d.ch.PublishWithContext(
 			ctx,
 			d.config.Exchange.Name,
-			d.config.RoutingKey,
+			routingKey,
 			d.config.Delivery.Mandatory,
 			d.config.Delivery.Immediate,
 			msg,
@@ -133,7 +156,7 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 
 		sdk.Logger(ctx).Trace().
 			Str("messageID", msgID).
-			Str("routingKey", d.config.RoutingKey).
+			Str("routingKey", routingKey).
 			Bool("mandatoryDelivery", d.config.Delivery.Mandatory).
 			Bool("immediateDelivery", d.config.Delivery.Immediate).
 			Msg("published message")

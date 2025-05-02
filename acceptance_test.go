@@ -16,6 +16,7 @@ package rabbitmq
 
 import (
 	"context"
+	"strings"
 	"testing"
 	"time"
 
@@ -38,6 +39,9 @@ func TestAcceptance(t *testing.T) {
 				queueName := setupQueueName(t, is)
 				sourceCfg["queue.name"] = queueName
 				destCfg["queue.name"] = queueName
+				destCfg["exchange.name"] = queueName
+				destCfg["exchange.type"] = "direct"
+				destCfg["routingKey"] = strings.ReplaceAll(t.Name(), "/", ".")
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,
@@ -61,6 +65,8 @@ func TestAcceptance_TLS(t *testing.T) {
 	destCfg := config.Config{
 		"url":            testURLTLS,
 		"queue.name":     "random-queue",
+		"exchange.name":  "random-exchange",
+		"exchange.type":  "direct",
 		"tls.enabled":    "true",
 		"tls.clientCert": "./test/certs/client.cert.pem",
 		"tls.clientKey":  "./test/certs/client.key.pem",
@@ -84,7 +90,7 @@ func TestAcceptance_TLS(t *testing.T) {
 				queueName := setupQueueNameTLS(t, is, tlsConfig)
 				sourceCfg["queue.name"] = queueName
 				destCfg["queue.name"] = queueName
-				destCfg["routingKey"] = queueName
+				destCfg["routingKey"] = strings.ReplaceAll(t.Name(), "/", ".")
 			},
 			WriteTimeout: 500 * time.Millisecond,
 			ReadTimeout:  500 * time.Millisecond,
