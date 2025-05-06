@@ -16,8 +16,19 @@ package rabbitmq
 
 import (
 	"context"
+	"fmt"
+	"regexp"
+	"strings"
+	"text/template"
 
+	"github.com/Masterminds/sprig/v3"
+	"github.com/conduitio/conduit-commons/opencdc"
 	sdk "github.com/conduitio/conduit-connector-sdk"
+)
+
+var (
+	routingKeyRegex     = regexp.MustCompile(`^[a-zA-Z0-9._\-]+$`)
+	maxRoutingKeyLength = 255
 )
 
 type Config struct {
@@ -150,8 +161,10 @@ type DestinationConfig struct {
 	Exchange ExchangeConfig `json:"exchange"`
 
 	// The routing key to use when publishing to an exchange
-	RoutingKey string `json:"routingKey" default:""`
+	RoutingKey string `json:"routingKey" default:"{{ index .Metadata \"rabbitmq.routingKey\" }}"`
 }
+
+type RoutingKeyFn func(opencdc.Record) (string, error)
 
 func (config *DestinationConfig) Validate(context.Context) error {
 	if config.Delivery.ContentType == "" {
@@ -163,4 +176,42 @@ func (config *DestinationConfig) Validate(context.Context) error {
 	}
 
 	return nil
+}
+
+// ParseRoutingKey returns either a static routing key or a function that determines the
+// routing key for each record individually. If the routing key is neither static nor a
+// template, an error is returned.
+func (config *DestinationConfig) ParseRoutingKey() (routingKey string, f RoutingKeyFn, err error) {
+	if routingKeyRegex.MatchString(config.RoutingKey) {
+		// The routingKey is static, check length.
+		if len(config.RoutingKey) > maxRoutingKeyLength {
+			return "", nil, fmt.Errorf("routingKey is too long, maximum length is %d", maxRoutingKeyLength)
+		}
+		return config.RoutingKey, nil, nil
+	}
+
+	// The routing key must be a template, check if it contains at least one action {{ }},
+	// to prevent allowing invalid static routing keys.
+	if !strings.Contains(config.RoutingKey, "{{") || !strings.Contains(config.RoutingKey, "}}") {
+		return "", nil, fmt.Errorf("routingKey is neither a valid static RabbitMQ routing key nor a valid Go template")
+	}
+
+	// Try to parse the routingKey
+	t, err := template.New("routingKey").Funcs(sprig.FuncMap()).Parse(config.RoutingKey)
+	if err != nil {
+		// The routingKey is not a valid Go template.
+		return "", nil, fmt.Errorf("routingKey is neither a valid static RabbitMQ routing key nor a valid Go template: %w", err)
+	}
+
+	// The routingKey is a valid template, return RoutingKeyFn.
+	var sb strings.Builder
+	return "", func(r opencdc.Record) (string, error) {
+		sb.Reset()
+		if err := t.Execute(&sb, r); err != nil {
+			return "", fmt.Errorf("failed to execute routingKey template: %w", err)
+		}
+		routingKey := sb.String()
+
+		return routingKey, nil
+	}, nil
 }

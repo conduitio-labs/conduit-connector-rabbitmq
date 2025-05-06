@@ -279,7 +279,7 @@ specification:
       - name: routingKey
         description: The routing key to use when publishing to an exchange
         type: string
-        default: ""
+        default: '{{ index .Metadata "rabbitmq.routingKey" }}'
         validations: []
       - name: tls.caCert
         description: The path to the CA certificate to use for TLS

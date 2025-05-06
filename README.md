@@ -268,7 +268,7 @@ pipelines:
           # The routing key to use when publishing to an exchange
           # Type: string
           # Required: no
-          routingKey: ""
+          routingKey: "{{ index .Metadata "rabbitmq.routingKey" }}"
           # The path to the CA certificate to use for TLS
           # Type: string
           # Required: no
