@@ -1,6 +1,6 @@
 services:
   rabbitmq:
-    image: rabbitmq:3.12-management
+    image: rabbitmq:4.1-management
     container_name: rabbitmq
     ports:
       - "5671:5671" # tls
