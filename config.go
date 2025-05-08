@@ -57,6 +57,9 @@ type QueueConfig struct {
 	// The name of the queue to consume from / publish to
 	Name string `json:"name" validate:"required"`
 
+	// Skips queue declare call assuming that it already exists.
+	SkipDeclare bool `json:"skipDeclare" default:"false"`
+
 	// Indicates if the queue will survive broker restarts.
 	Durable bool `json:"durable" default:"true"`
 
@@ -101,6 +104,9 @@ type ExchangeConfig struct {
 
 	// The type of the exchange (e.g., direct, fanout, topic, headers).
 	Type string `json:"type"`
+
+	// Skips exchange declare call assuming that it already exists.
+	SkipDeclare bool `json:"skipDeclare" default:"false"`
 
 	// Indicates if the exchange will survive broker restarts.
 	Durable bool `json:"durable" default:"true"`
