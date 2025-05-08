@@ -73,17 +73,10 @@ func (s *Source) Open(ctx context.Context, sdkPos opencdc.Position) (err error) 
 		s.config.Queue.Name = pos.QueueName
 	}
 
-	s.queue, err = s.ch.QueueDeclare(
-		s.config.Queue.Name,
-		s.config.Queue.Durable,
-		s.config.Queue.AutoDelete,
-		s.config.Queue.Exclusive,
-		s.config.Queue.NoWait,
-		nil)
+	err = s.declareQueue(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to declare queue: %w", err)
+		return err
 	}
-	sdk.Logger(ctx).Debug().Str("queueName", s.queue.Name).Msg("declared queue")
 
 	s.msgs, err = s.ch.Consume(
 		s.queue.Name,
@@ -96,7 +89,7 @@ func (s *Source) Open(ctx context.Context, sdkPos opencdc.Position) (err error) 
 	if err != nil {
 		return fmt.Errorf("failed to consume: %w", err)
 	}
-	sdk.Logger(ctx).Debug().Str("queueName", s.queue.Name).Msg("subscribed to queue")
+	sdk.Logger(ctx).Debug().Str("queue.name", s.queue.Name).Msg("subscribed to queue")
 
 	return nil
 }
@@ -167,6 +160,27 @@ func (s *Source) Teardown(ctx context.Context) error {
 	}
 
 	sdk.Logger(ctx).Debug().Msg("source teardown complete")
+
+	return nil
+}
+
+func (s *Source) declareQueue(ctx context.Context) (err error) {
+	if s.config.Queue.SkipDeclare {
+		sdk.Logger(ctx).Debug().Str("queue.name", s.queue.Name).Msg("skipping queue declare")
+		return nil
+	}
+
+	s.queue, err = s.ch.QueueDeclare(
+		s.config.Queue.Name,
+		s.config.Queue.Durable,
+		s.config.Queue.AutoDelete,
+		s.config.Queue.Exclusive,
+		s.config.Queue.NoWait,
+		nil)
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+	sdk.Logger(ctx).Debug().Any("queueConfig", s.config.Queue).Msg("queue declared")
 
 	return nil
 }

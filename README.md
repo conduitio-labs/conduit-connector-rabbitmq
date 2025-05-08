@@ -85,6 +85,10 @@ pipelines:
           # Type: bool
           # Required: no
           queue.noWait: "false"
+          # Skips queue declare call assuming that it already exists.
+          # Type: bool
+          # Required: no
+          queue.skipDeclare: "false"
           # The path to the CA certificate to use for TLS
           # Type: string
           # Required: no
@@ -243,6 +247,10 @@ pipelines:
           # Type: bool
           # Required: no
           exchange.noWait: "false"
+          # Skips exchange declare call assuming that it already exists.
+          # Type: bool
+          # Required: no
+          exchange.skipDeclare: "false"
           # The type of the exchange (e.g., direct, fanout, topic, headers).
           # Type: string
           # Required: no
@@ -265,6 +273,10 @@ pipelines:
           # Type: bool
           # Required: no
           queue.noWait: "false"
+          # Skips queue declare call assuming that it already exists.
+          # Type: bool
+          # Required: no
+          queue.skipDeclare: "false"
           # The routing key to use when publishing to an exchange
           # Type: string
           # Required: no
