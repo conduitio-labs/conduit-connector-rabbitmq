@@ -66,6 +66,11 @@ specification:
         type: bool
         default: "false"
         validations: []
+      - name: queue.skipDeclare
+        description: Skips queue declare call assuming that it already exists.
+        type: bool
+        default: "false"
+        validations: []
       - name: tls.caCert
         description: The path to the CA certificate to use for TLS
         type: string
@@ -251,6 +256,11 @@ specification:
         type: bool
         default: "false"
         validations: []
+      - name: exchange.skipDeclare
+        description: Skips exchange declare call assuming that it already exists.
+        type: bool
+        default: "false"
+        validations: []
       - name: exchange.type
         description: The type of the exchange (e.g., direct, fanout, topic, headers).
         type: string
@@ -273,6 +283,11 @@ specification:
         validations: []
       - name: queue.noWait
         description: Indicates if the queue should be declared without waiting for server confirmation.
+        type: bool
+        default: "false"
+        validations: []
+      - name: queue.skipDeclare
+        description: Skips queue declare call assuming that it already exists.
         type: bool
         default: "false"
         validations: []

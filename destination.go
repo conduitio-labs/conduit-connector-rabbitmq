@@ -66,43 +66,14 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	}
 	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
-	_, err = d.ch.QueueDeclare(
-		d.config.Queue.Name,
-		d.config.Queue.Durable,
-		d.config.Queue.AutoDelete,
-		d.config.Queue.Exclusive,
-		d.config.Queue.NoWait,
-		nil)
+	err = d.declareQueue(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to declare queue: %w", err)
+		return err
 	}
-	sdk.Logger(ctx).Debug().Any("queueConfig", d.config.Queue).Msgf("declared queue")
 
-	if d.config.Exchange.Name != "" {
-		err = d.ch.ExchangeDeclare(
-			d.config.Exchange.Name,
-			d.config.Exchange.Type,
-			d.config.Exchange.Durable,
-			d.config.Exchange.AutoDelete,
-			d.config.Exchange.Internal,
-			d.config.Exchange.NoWait,
-			nil,
-		)
-		if err != nil {
-			return fmt.Errorf("failed to declare exchange: %w", err)
-		}
-		sdk.Logger(ctx).Debug().Any("exchange config", d.config.Exchange).Msgf("declared exchange")
-
-		if routingKeyFn == nil {
-			err = d.ch.QueueBind(d.config.Queue.Name, d.routingKey, d.config.Exchange.Name, false, nil)
-			if err != nil {
-				return fmt.Errorf("failed to bind queue to exchange: %w", err)
-			}
-			sdk.Logger(ctx).Debug().Msgf(
-				"bound queue %s to exchange %s with routing key %s",
-				d.config.Queue.Name, d.config.Exchange.Name, d.routingKey,
-			)
-		}
+	err = d.declareExchange(ctx)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -184,6 +155,66 @@ func (d *Destination) Teardown(ctx context.Context) error {
 	}
 
 	sdk.Logger(ctx).Info().Msg("destination teardown complete")
+
+	return nil
+}
+
+func (d *Destination) declareQueue(ctx context.Context) (err error) {
+	if d.config.Queue.SkipDeclare {
+		sdk.Logger(ctx).Debug().Str("queue.name", d.config.Queue.Name).Msg("skipping queue declare")
+		return nil
+	}
+
+	_, err = d.ch.QueueDeclare(
+		d.config.Queue.Name,
+		d.config.Queue.Durable,
+		d.config.Queue.AutoDelete,
+		d.config.Queue.Exclusive,
+		d.config.Queue.NoWait,
+		nil)
+	if err != nil {
+		return fmt.Errorf("failed to declare queue: %w", err)
+	}
+	sdk.Logger(ctx).Debug().Any("queueConfig", d.config.Queue).Msg("queue declared")
+
+	return nil
+}
+
+func (d *Destination) declareExchange(ctx context.Context) (err error) {
+	if d.config.Exchange.SkipDeclare {
+		sdk.Logger(ctx).Debug().Str("exchange.name", d.config.Exchange.Name).Msg("skipping exchange declare")
+		return nil
+	}
+
+	if d.config.Exchange.Name == "" {
+		// Skip declaring exchange with an empty name.
+		return nil
+	}
+
+	err = d.ch.ExchangeDeclare(
+		d.config.Exchange.Name,
+		d.config.Exchange.Type,
+		d.config.Exchange.Durable,
+		d.config.Exchange.AutoDelete,
+		d.config.Exchange.Internal,
+		d.config.Exchange.NoWait,
+		nil,
+	)
+	if err != nil {
+		return fmt.Errorf("failed to declare exchange: %w", err)
+	}
+	sdk.Logger(ctx).Debug().Any("exchangeConfig", d.config.Exchange).Msgf("exchange declared")
+
+	if d.getRoutingKey == nil {
+		err = d.ch.QueueBind(d.config.Queue.Name, d.routingKey, d.config.Exchange.Name, false, nil)
+		if err != nil {
+			return fmt.Errorf("failed to bind queue to exchange: %w", err)
+		}
+		sdk.Logger(ctx).Debug().Msgf(
+			"bound queue %s to exchange %s with routing key %s",
+			d.config.Queue.Name, d.config.Exchange.Name, d.routingKey,
+		)
+	}
 
 	return nil
 }
