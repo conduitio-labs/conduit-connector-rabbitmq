@@ -66,6 +66,8 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	}
 	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
+	// We setup the channel in confirm mode, so that we ensure the "written"
+	// total of records that we return is correct.
 	noWait := false
 	if err := d.ch.Confirm(noWait); err != nil {
 		return fmt.Errorf("failed to set channel on confirm mode: %w", err)
@@ -105,9 +107,11 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			Expiration: d.config.Delivery.Expiration,
 		}
 
-		if createdAt, err := record.Metadata.GetCreatedAt(); err != nil {
-			msg.Timestamp = createdAt
+		createdAt, err := record.Metadata.GetCreatedAt()
+		if err != nil {
+			return i, fmt.Errorf("failed to get createdAt: %w", err)
 		}
+		msg.Timestamp = createdAt
 
 		routingKey := d.routingKey
 		if d.getRoutingKey != nil {
@@ -140,18 +144,6 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 				msgID, msg.Type, msg.UserId, msg.AppId,
 			)
 		}
-
-		// err := d.ch.PublishWithContext(
-		// 	ctx,
-		// 	d.config.Exchange.Name,
-		// 	routingKey,
-		// 	d.config.Delivery.Mandatory,
-		// 	d.config.Delivery.Immediate,
-		// 	msg,
-		// )
-		// if err != nil {
-		// 	return i, fmt.Errorf("failed to publish: %w", err)
-		// }
 
 		sdk.Logger(ctx).Trace().
 			Str("messageID", msgID).
