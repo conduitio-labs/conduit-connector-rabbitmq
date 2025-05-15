@@ -86,32 +86,34 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	return nil
 }
 
+func (d *Destination) createMessage(record opencdc.Record, msgID string) amqp091.Publishing {
+	return amqp091.Publishing{
+		ContentType:     d.config.Delivery.ContentType,
+		ContentEncoding: d.config.Delivery.ContentEncoding,
+		DeliveryMode:    d.config.Delivery.DeliveryMode,
+		Priority:        d.config.Delivery.Priority,
+		CorrelationId:   d.config.Delivery.CorrelationID,
+		ReplyTo:         d.config.Delivery.ReplyTo,
+
+		MessageId: msgID,
+		Type:      d.config.Delivery.MessageTypeName,
+		UserId:    d.config.Delivery.UserID,
+		AppId:     d.config.Delivery.AppID,
+		Headers:   metadataToHeaders(record.Metadata),
+		Body:      record.Bytes(),
+
+		Expiration: d.config.Delivery.Expiration,
+	}
+}
+
 func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int, error) {
 	for i, record := range records {
 		msgID := string(record.Position)
-		msg := amqp091.Publishing{
-			ContentType:     d.config.Delivery.ContentType,
-			ContentEncoding: d.config.Delivery.ContentEncoding,
-			DeliveryMode:    d.config.Delivery.DeliveryMode,
-			Priority:        d.config.Delivery.Priority,
-			CorrelationId:   d.config.Delivery.CorrelationID,
-			ReplyTo:         d.config.Delivery.ReplyTo,
+		msg := d.createMessage(record, msgID)
 
-			MessageId: msgID,
-			Type:      d.config.Delivery.MessageTypeName,
-			UserId:    d.config.Delivery.UserID,
-			AppId:     d.config.Delivery.AppID,
-			Headers:   metadataToHeaders(record.Metadata),
-			Body:      record.Bytes(),
-
-			Expiration: d.config.Delivery.Expiration,
+		if createdAt, err := record.Metadata.GetCreatedAt(); err == nil {
+			msg.Timestamp = createdAt
 		}
-
-		createdAt, err := record.Metadata.GetCreatedAt()
-		if err != nil {
-			return i, fmt.Errorf("failed to get createdAt: %w", err)
-		}
-		msg.Timestamp = createdAt
 
 		routingKey := d.routingKey
 		if d.getRoutingKey != nil {
