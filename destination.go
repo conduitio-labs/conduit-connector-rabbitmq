@@ -66,6 +66,11 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	}
 	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
+	noWait := false
+	if err := d.ch.Confirm(noWait); err != nil {
+		return fmt.Errorf("failed to set channel on confirm mode: %w", err)
+	}
+
 	err = d.declareQueue(ctx)
 	if err != nil {
 		return err
@@ -113,8 +118,7 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			}
 		}
 
-		err := d.ch.PublishWithContext(
-			ctx,
+		confirmer, err := d.ch.PublishWithDeferredConfirm(
 			d.config.Exchange.Name,
 			routingKey,
 			d.config.Delivery.Mandatory,
@@ -124,6 +128,30 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 		if err != nil {
 			return i, fmt.Errorf("failed to publish: %w", err)
 		}
+
+		confirmed, err := confirmer.WaitContext(ctx)
+		if err != nil {
+			return i, fmt.Errorf("failed to wait for publish confirmation: %w", err)
+		}
+
+		if !confirmed {
+			return i, fmt.Errorf(
+				"message was not confirmed: id=%s type=%s userId=%s appId=%s",
+				msgID, msg.Type, msg.UserId, msg.AppId,
+			)
+		}
+
+		// err := d.ch.PublishWithContext(
+		// 	ctx,
+		// 	d.config.Exchange.Name,
+		// 	routingKey,
+		// 	d.config.Delivery.Mandatory,
+		// 	d.config.Delivery.Immediate,
+		// 	msg,
+		// )
+		// if err != nil {
+		// 	return i, fmt.Errorf("failed to publish: %w", err)
+		// }
 
 		sdk.Logger(ctx).Trace().
 			Str("messageID", msgID).
