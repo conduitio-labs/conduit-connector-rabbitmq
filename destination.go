@@ -124,7 +124,7 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			}
 		}
 
-		confirmer, err := d.ch.PublishWithDeferredConfirm(
+		deferredConfirmation, err := d.ch.PublishWithDeferredConfirm(
 			d.config.Exchange.Name,
 			routingKey,
 			d.config.Delivery.Mandatory,
@@ -135,7 +135,7 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			return i, fmt.Errorf("failed to publish: %w", err)
 		}
 
-		confirmed, err := confirmer.WaitContext(ctx)
+		confirmed, err := deferredConfirmation.WaitContext(ctx)
 		if err != nil {
 			return i, fmt.Errorf("failed to wait for publish confirmation: %w", err)
 		}
