@@ -106,8 +106,39 @@ func (d *Destination) createMessage(record opencdc.Record, msgID string) amqp091
 	}
 }
 
+func (d *Destination) createConfirmation(
+	ctx context.Context,
+	confirmation *amqp091.DeferredConfirmation,
+	msgID string,
+	routingKey string,
+	msg amqp091.Publishing,
+) func() error {
+	return func() error {
+		confirmed, err := confirmation.WaitContext(ctx)
+		if err != nil {
+			return fmt.Errorf("failed to wait for publish confirmation: %w", err)
+		}
+
+		if !confirmed {
+			return fmt.Errorf(
+				"message was not confirmed: id=%s type=%s userId=%s appId=%s",
+				msgID, msg.Type, msg.UserId, msg.AppId,
+			)
+		}
+
+		sdk.Logger(ctx).Trace().
+			Str("messageID", msgID).
+			Str("routingKey", routingKey).
+			Bool("mandatoryDelivery", d.config.Delivery.Mandatory).
+			Bool("immediateDelivery", d.config.Delivery.Immediate).
+			Msg("published message")
+
+		return nil
+	}
+}
+
 func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int, error) {
-	var confirmations []func() error
+	confirmations := make([]func() error, 0, len(records))
 
 	for _, record := range records {
 		msgID := string(record.Position)
@@ -137,28 +168,8 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
 
-		confirmations = append(confirmations, func() error {
-			confirmed, err := confirmation.WaitContext(ctx)
-			if err != nil {
-				return fmt.Errorf("failed to wait for publish confirmation: %w", err)
-			}
-
-			if !confirmed {
-				return fmt.Errorf(
-					"message was not confirmed: id=%s type=%s userId=%s appId=%s",
-					msgID, msg.Type, msg.UserId, msg.AppId,
-				)
-			}
-
-			sdk.Logger(ctx).Trace().
-				Str("messageID", msgID).
-				Str("routingKey", routingKey).
-				Bool("mandatoryDelivery", d.config.Delivery.Mandatory).
-				Bool("immediateDelivery", d.config.Delivery.Immediate).
-				Msg("published message")
-
-			return nil
-		})
+		confirmationFn := d.createConfirmation(ctx, confirmation, msgID, routingKey, msg)
+		confirmations = append(confirmations, confirmationFn)
 	}
 
 	for i, confirmation := range confirmations {
