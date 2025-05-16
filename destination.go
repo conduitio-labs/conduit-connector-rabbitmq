@@ -66,6 +66,13 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	}
 	sdk.Logger(ctx).Debug().Msgf("opened channel")
 
+	// We setup the channel in confirm mode, so that we ensure the "written"
+	// total of records that we return is correct.
+	noWait := false
+	if err := d.ch.Confirm(noWait); err != nil {
+		return fmt.Errorf("failed to set channel on confirm mode: %w", err)
+	}
+
 	err = d.declareQueue(ctx)
 	if err != nil {
 		return err
@@ -79,50 +86,44 @@ func (d *Destination) Open(ctx context.Context) (err error) {
 	return nil
 }
 
-func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int, error) {
-	for i, record := range records {
-		msgID := string(record.Position)
-		msg := amqp091.Publishing{
-			ContentType:     d.config.Delivery.ContentType,
-			ContentEncoding: d.config.Delivery.ContentEncoding,
-			DeliveryMode:    d.config.Delivery.DeliveryMode,
-			Priority:        d.config.Delivery.Priority,
-			CorrelationId:   d.config.Delivery.CorrelationID,
-			ReplyTo:         d.config.Delivery.ReplyTo,
+func (d *Destination) createMessage(record opencdc.Record, msgID string) amqp091.Publishing {
+	return amqp091.Publishing{
+		ContentType:     d.config.Delivery.ContentType,
+		ContentEncoding: d.config.Delivery.ContentEncoding,
+		DeliveryMode:    d.config.Delivery.DeliveryMode,
+		Priority:        d.config.Delivery.Priority,
+		CorrelationId:   d.config.Delivery.CorrelationID,
+		ReplyTo:         d.config.Delivery.ReplyTo,
 
-			MessageId: msgID,
-			Type:      d.config.Delivery.MessageTypeName,
-			UserId:    d.config.Delivery.UserID,
-			AppId:     d.config.Delivery.AppID,
-			Headers:   metadataToHeaders(record.Metadata),
-			Body:      record.Bytes(),
+		MessageId: msgID,
+		Type:      d.config.Delivery.MessageTypeName,
+		UserId:    d.config.Delivery.UserID,
+		AppId:     d.config.Delivery.AppID,
+		Headers:   metadataToHeaders(record.Metadata),
+		Body:      record.Bytes(),
 
-			Expiration: d.config.Delivery.Expiration,
-		}
+		Expiration: d.config.Delivery.Expiration,
+	}
+}
 
-		if createdAt, err := record.Metadata.GetCreatedAt(); err != nil {
-			msg.Timestamp = createdAt
-		}
-
-		routingKey := d.routingKey
-		if d.getRoutingKey != nil {
-			var err error
-			routingKey, err = d.getRoutingKey(record)
-			if err != nil {
-				return i, fmt.Errorf("could not get routingKey: %w", err)
-			}
-		}
-
-		err := d.ch.PublishWithContext(
-			ctx,
-			d.config.Exchange.Name,
-			routingKey,
-			d.config.Delivery.Mandatory,
-			d.config.Delivery.Immediate,
-			msg,
-		)
+func (d *Destination) createConfirmation(
+	ctx context.Context,
+	confirmation *amqp091.DeferredConfirmation,
+	msgID string,
+	routingKey string,
+	msg amqp091.Publishing,
+) func() error {
+	return func() error {
+		confirmed, err := confirmation.WaitContext(ctx)
 		if err != nil {
-			return i, fmt.Errorf("failed to publish: %w", err)
+			return fmt.Errorf("failed to wait for publish confirmation: %w", err)
+		}
+
+		if !confirmed {
+			return fmt.Errorf(
+				"message was not confirmed: id=%s type=%s userId=%s appId=%s",
+				msgID, msg.Type, msg.UserId, msg.AppId,
+			)
 		}
 
 		sdk.Logger(ctx).Trace().
@@ -131,6 +132,50 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			Bool("mandatoryDelivery", d.config.Delivery.Mandatory).
 			Bool("immediateDelivery", d.config.Delivery.Immediate).
 			Msg("published message")
+
+		return nil
+	}
+}
+
+func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int, error) {
+	confirmations := make([]func() error, 0, len(records))
+
+	for _, record := range records {
+		msgID := string(record.Position)
+		msg := d.createMessage(record, msgID)
+
+		if createdAt, err := record.Metadata.GetCreatedAt(); err == nil {
+			msg.Timestamp = createdAt
+		}
+
+		routingKey := d.routingKey
+		if d.getRoutingKey != nil {
+			var err error
+			routingKey, err = d.getRoutingKey(record)
+			if err != nil {
+				return 0, fmt.Errorf("could not get routingKey: %w", err)
+			}
+		}
+
+		confirmation, err := d.ch.PublishWithDeferredConfirm(
+			d.config.Exchange.Name,
+			routingKey,
+			d.config.Delivery.Mandatory,
+			d.config.Delivery.Immediate,
+			msg,
+		)
+		if err != nil {
+			return 0, fmt.Errorf("failed to publish: %w", err)
+		}
+
+		confirmationFn := d.createConfirmation(ctx, confirmation, msgID, routingKey, msg)
+		confirmations = append(confirmations, confirmationFn)
+	}
+
+	for i, confirmation := range confirmations {
+		if err := confirmation(); err != nil {
+			return i, err
+		}
 	}
 
 	return len(records), nil
