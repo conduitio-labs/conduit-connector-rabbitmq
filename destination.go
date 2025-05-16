@@ -107,7 +107,9 @@ func (d *Destination) createMessage(record opencdc.Record, msgID string) amqp091
 }
 
 func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int, error) {
-	for i, record := range records {
+	var confirmations []func() error
+
+	for _, record := range records {
 		msgID := string(record.Position)
 		msg := d.createMessage(record, msgID)
 
@@ -120,11 +122,11 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			var err error
 			routingKey, err = d.getRoutingKey(record)
 			if err != nil {
-				return i, fmt.Errorf("could not get routingKey: %w", err)
+				return 0, fmt.Errorf("could not get routingKey: %w", err)
 			}
 		}
 
-		deferredConfirmation, err := d.ch.PublishWithDeferredConfirm(
+		confirmation, err := d.ch.PublishWithDeferredConfirm(
 			d.config.Exchange.Name,
 			routingKey,
 			d.config.Delivery.Mandatory,
@@ -132,27 +134,37 @@ func (d *Destination) Write(ctx context.Context, records []opencdc.Record) (int,
 			msg,
 		)
 		if err != nil {
-			return i, fmt.Errorf("failed to publish: %w", err)
+			return 0, fmt.Errorf("failed to publish: %w", err)
 		}
 
-		confirmed, err := deferredConfirmation.WaitContext(ctx)
-		if err != nil {
-			return i, fmt.Errorf("failed to wait for publish confirmation: %w", err)
-		}
+		confirmations = append(confirmations, func() error {
+			confirmed, err := confirmation.WaitContext(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to wait for publish confirmation: %w", err)
+			}
 
-		if !confirmed {
-			return i, fmt.Errorf(
-				"message was not confirmed: id=%s type=%s userId=%s appId=%s",
-				msgID, msg.Type, msg.UserId, msg.AppId,
-			)
-		}
+			if !confirmed {
+				return fmt.Errorf(
+					"message was not confirmed: id=%s type=%s userId=%s appId=%s",
+					msgID, msg.Type, msg.UserId, msg.AppId,
+				)
+			}
 
-		sdk.Logger(ctx).Trace().
-			Str("messageID", msgID).
-			Str("routingKey", routingKey).
-			Bool("mandatoryDelivery", d.config.Delivery.Mandatory).
-			Bool("immediateDelivery", d.config.Delivery.Immediate).
-			Msg("published message")
+			sdk.Logger(ctx).Trace().
+				Str("messageID", msgID).
+				Str("routingKey", routingKey).
+				Bool("mandatoryDelivery", d.config.Delivery.Mandatory).
+				Bool("immediateDelivery", d.config.Delivery.Immediate).
+				Msg("published message")
+
+			return nil
+		})
+	}
+
+	for i, confirmation := range confirmations {
+		if err := confirmation(); err != nil {
+			return i, err
+		}
 	}
 
 	return len(records), nil
